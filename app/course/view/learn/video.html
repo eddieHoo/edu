@@ -1,0 +1,144 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+.layui-card-header{height:45px; line-height:45px;}
+.layui-card-body{height:600px;}
+.video-course{margin:5px auto;}
+.learn-item{padding:6px; border-radius:3px; cursor:pointer;}
+.learn-item:hover{background-color:#f5f5f5;}
+.study-section-title{margin-top:8px; margin-bottom:3px;}
+.section-item-suffix{margin-left:20px; color:#999;font-size:12px;}
+.section-item{padding:3px 10px; border-radius:4px; margin-top:2px;}
+.section-item:hover{background-color:#f3f3f3;}
+.section-item.selected{background-color:#f0f0f0;}
+.section-item.selected a{color:#ff5722}
+.layui-card-body{overflow-x:hidden;overflow-y:auto}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">
+	<div class="layui-row">
+		<div class="layui-col-xs9">
+			<div class="layui-card">
+				<div class="layui-card-header"><strong>课程详情</strong></div>
+				<div class="layui-card-body">
+					<div id="videoBox" class="video-course">
+						<div class="section-study">
+							<div class="study-video-wrapper" id="player" data-url="{$learn.url}"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="layui-col-xs3">
+			<div class="layui-card">
+				<div class="layui-card-header"><strong>课程章节({$section_count})</strong></div>
+				<div id="section" class="layui-card-body">
+					{volist name="$section" id="vo" key="k"}
+					<div class="study-section">
+						<div class="study-section-title">
+							<strong>第{$k}章 {$vo.title}</strong>
+						</div>
+						<ul>
+							{volist name="$vo.material" id="voo" key="kk"}
+							<li class="section-item {$mid == $voo.id?'selected':''}" data-type="video">
+								<a href="/course/learn/learn/id/{$detail.id}/mid/{$voo.id}">
+									<p class="section-item-text"><i class="iconfont icon-jingpinketang"></i> {$k}-{$kk} {$voo.title}</p>
+									<span class="section-item-suffix">{:getTimeBySec($voo.duration)}</span>
+								</a>
+							</li>
+							{/volist}
+						</ul>
+					</div>
+					{/volist}
+				</div>
+			</div>
+	  </div>
+
+	</div>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+const course_id = {$detail.id};
+const material_id = {$mid};
+const integral = {$learn.integral};
+var is_finish = {$is_finish};
+const moduleInit = ['tool','tcplayer'];
+function gouguInit() {
+	var form = layui.form,tool=layui.tool, tcplayer = layui.tcplayer;
+	let url = $('#player').data('url');
+	let width = $('#player').width();
+	let playtime=0;
+	tcplayer.init('player',{
+		switch_enabled:false,
+		contextmenu:true,
+		autoplay:true,
+		url: url,
+		width:width,
+		height:width/1.7777778,
+		playbackRateMenuButton:false,
+		canplay:function(duration){
+			console.log(duration);
+		},
+		timeupdate:function(currentTime){
+			if(currentTime>playtime+2){
+				playtime = currentTime;
+				if(is_finish == 0){
+					duration();
+				}
+			}
+		},
+		ended:function(duration){
+			if(is_finish == 0){
+				$.ajax({
+					url: '/course/api/finish',
+					cache: false,
+					type:'POST',
+					data:{course_id:course_id,material_id:material_id},
+					success:function(res){
+						if(res.code==0){
+							is_finish = 1;
+							//layer.msg('恭喜学习完成，获得了'+integral+'积分');
+						}
+						else{
+							layer.msg(res.msg);
+						}
+					}
+				});
+			}
+			else{
+				layer.msg('播放完毕');
+			}
+			console.log(duration);
+		}
+	});
+	
+	//更新学习时长
+	var duration = function() {
+		$.ajax({
+			url: '/course/api/duration',
+			cache: false,
+			type:'POST',
+			data:{course_id:course_id,material_id:material_id,second:playtime},
+			complete:function(res){
+				console.log(res);
+			}
+		});
+	};
+	
+	
+	
+	var $container = $('#section');
+	var $target = $container.find('.selected');
+	$container.animate({
+		scrollTop: $target.position().top + $container.scrollTop()
+	}, 500);
+}
+</script>
+{/block}
+<!-- /脚本 -->

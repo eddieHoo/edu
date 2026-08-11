@@ -1,0 +1,246 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+.layui-table-0 .tr-1,.layui-table-0 .tr-2,.layui-table-0 .tr-3{display:none;}
+.layui-table-1 .tr-2,.layui-table-1 .tr-3{display:none;}
+.layui-table-2 .tr-1,.layui-table-2 .tr-3{display:none;}
+.layui-table-3 .tr-1,.layui-table-3 .tr-2{display:none;}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<form class="layui-form p-page">
+	<h3 class="pb-2">编辑线下培训</h3>
+	<table class="layui-table layui-table-form layui-table-{$detail.types|default=0}" id="pageTable">
+		<tr>
+			<td class="layui-td-gray">培训名称<font>*</font></td>
+			<td><input type="text" name="title" class="layui-input" placeholder="请输入培训名称" lay-verify="required" lay-reqText="请输入培训名称" value="{$detail.title|default=''}"></td>
+			<td class="layui-td-gray">培训类型<font>*</font></td>
+			<td style="width:272px">
+				<select name="cate_id" lay-verify="required" lay-reqText="请选择培训类型">
+					<option value="">请选择</option>
+					{volist name = ":get_base_data('train_cate')" id="vo"}
+					<option value="{$vo.id}" {eq name="$detail.cate_id" value="$vo.id"} selected{/eq}>{$vo.title}</option>
+					{/volist}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">培训目标<font>*</font></td>
+			<td colspan="3"><textarea name="desc" placeholder="请输入培训培训目标" lay-reqText="请输入培训培训目标" class="layui-textarea">{$detail.desc|default=''}</textarea></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">培训周期<font>*</font></td>
+			<td>
+			  <div id="range">
+				<div class="layui-input-inline" style="width:48%;">
+					<input type="text" id="start_time" name="start_time" class="layui-input" readonly placeholder="开始日期" value="{$detail.start_time_str|default=''}">
+				</div>
+				<div class="layui-input-inline" style="width:2%; text-align:center">-</div>
+				<div class="layui-input-inline" style="width:48%;">
+					<input type="text" id="end_time" name="end_time" class="layui-input" readonly placeholder="结束日期" value="{$detail.end_time_str|default=''}">
+				</div>
+			  </div>
+			</td>
+			<td class="layui-td-gray-2">培训总时长<font>*</font></td>
+			<td>
+				<div class="layui-input-inline" style="width:150px;">
+				  <input type="text" name="duration" lay-verify="required|number" value="{$detail.duration|default=''}" lay-reqText="请输入培训总时长" placeholder="请输入培训总时长" class="layui-input">
+				</div>
+				<div class="layui-input-inline layui-text-em">个工作日</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">培训对象<font>*</font></td>
+			<td>
+				<input type="radio" name="types" lay-filter="types" value="0" title="全部" {eq name="$detail.types" value="0"}checked{/eq}>
+				<input type="radio" name="types" lay-filter="types" value="1" title="部门" {eq name="$detail.types" value="1"}checked{/eq}>
+				<input type="radio" name="types" lay-filter="types" value="2" title="岗位" {eq name="$detail.types" value="2"}checked{/eq}>
+				<input type="radio" name="types" lay-filter="types" value="3" title="员工" {eq name="$detail.types" value="3"}checked{/eq}>
+			</td>
+			<td class="layui-td-gray">具体时间安排</td>
+			<td><input type="text" name="tips_time" placeholder="如：每日时间：9:00-12:00，14:00-17:00" class="layui-input" value="{$detail.tips_time|default=''}"></td>
+		</tr>
+		<tr class="tr-1">
+			<td class="layui-td-gray-2">参与培训部门<font>*</font></td>
+			<td colspan="3">
+				<input type="text" name="departments" value="{$detail.departments|default=''}" placeholder="请选择参与培训部门" readonly class="layui-input picker-oa" data-types="department" data-type="2">
+				<input type="hidden" name="dids" value="{$detail.dids|default=''}">
+			</td>
+		</tr>
+		<tr class="tr-2">
+			<td class="layui-td-gray-2">参与培训岗位<font>*</font></td>
+			<td colspan="3">
+				<input type="text" name="positions" value="{$detail.positions|default=''}" placeholder="请选择参与培训岗位" readonly class="layui-input picker-oa" data-types="position" data-type="2"">
+				<input type="hidden" name="pids" value="{$detail.pids|default=''}">
+			</td>
+		</tr>
+		<tr class="tr-3">
+			<td class="layui-td-gray-2">参与培训人员<font>*</font></td>
+			<td colspan="3">
+				<input type="text" name="unames" value="{$detail.unames|default=''}" placeholder="请选择参与培训人员" readonly class="layui-input picker-admin" data-type="2">
+				<input type="hidden" name="uids" value="{$detail.uids|default=''}">
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">培训状态<font>*</font></td>
+			<td colspan="5">
+				<input type="radio" name="status" lay-filter="status" value="1" title="未发布" {eq name="$detail.status" value="1"} checked{/eq}>
+				<input type="radio" name="status" lay-filter="status" value="2" title="已发布" {eq name="$detail.status" value="2"} checked{/eq}>
+				<input type="radio" name="status" lay-filter="status" value="3" title="培训中" {eq name="$detail.status" value="3"} checked{/eq}>
+				<input type="radio" name="status" lay-filter="status" value="4" title="已培训" {eq name="$detail.status" value="4"} checked{/eq}>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="4"><strong>培训计划 / 执行表</strong> <span class="layui-btn layui-btn-sm" type="button" id="planAdd">+ 添加选项</span></td>
+		</tr>
+		<tr>
+			<td colspan="4">				
+				<table id="planTable" class="layui-table layui-table-min" style="margin:0">
+					<tr>
+						<th width="200">培训阶段名称</th>
+						<th width="100">培训具体时间</th>
+						<th width="300">培训内容</th>
+						<th width="60">培训师</th>
+						<th width="100">执行方式</th>
+						<th width="150">培训成果</th>
+						<th width="30">操作</th>
+					</tr>
+					{notempty name="$detail.content_plan"}
+					{volist name="$detail.content_plan" id="vo"}
+					<tr class="plan-tr">
+						<td><input type="text" name="plan_title[]" value="{$vo.plan_title|default=''}" class="layui-input" lay-verify="required" lay-reqText="请完培训阶段名称"></td>
+						<td><input type="text" name="plan_time[]" value="{$vo.plan_time|default=''}" class="layui-input" lay-verify="required" lay-reqText="请完善培训具体时间"></td>
+						<td><input type="text" name="plan_content[]" value="{$vo.plan_content|default=''}" class="layui-input" lay-verify="required" lay-reqText="请完善培训内容"></td>
+						<td>
+							<input type="text" name="plan_lecturer[]" value="{$vo.plan_lecturer|default=''}" readonly class="layui-input picker-admin" lay-verify="required" lay-reqText="请完善培训师">
+							<input type="hidden" name="plan_lecturer_id[]" value="{$vo.plan_lecturer_id|default=0}">
+						</td>
+						<td><input type="text" name="plan_types[]" value="{$vo.plan_types|default=''}" class="layui-input" lay-verify="required" lay-reqText="请完善执行方式"></td>
+						<td><input type="text" name="plan_result[]" value="{$vo.plan_result|default=''}" class="layui-input"></td>
+						<td><a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a></td>
+					</tr>
+					{/volist}
+					{else/}
+					<tr class="plan-tr">
+						<td><input type="text" name="plan_title[]" value="" class="layui-input" lay-verify="required" lay-reqText="请完培训阶段名称"></td>
+						<td><input type="text" name="plan_time[]" value="" class="layui-input" lay-verify="required" lay-reqText="请完善培训具体时间"></td>
+						<td><input type="text" name="plan_content[]" value="" class="layui-input" lay-verify="required" lay-reqText="请完善培训内容"></td>
+						<td>
+							<input type="text" name="plan_lecturer[]" value="" class="layui-input picker-admin" readonly lay-verify="required" lay-reqText="请完善培训师">
+							<input type="hidden" name="plan_lecturer_id[]" value="0">
+						</td>
+						<td><input type="text" name="plan_types[]" value="" class="layui-input" lay-verify="required" lay-reqText="请完善执行方式"></td>
+						<td><input type="text" name="plan_result[]" value="" class="layui-input"></td>
+						<td><a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a></td>
+					</tr>
+					{/notempty}
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="4"><strong>培训资料 / 课件</strong></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">
+				<button type="button" class="layui-btn layui-btn-sm" id="uploadBtn"><i class="layui-icon"></i>资料上传</button>
+			</td>
+			<td colspan="3">
+				<div class="layui-row" id="uploadBox">
+					<input type="hidden" data-type="file" name="file_ids" value="{$detail.file_ids}">
+					{notempty name="$detail.file_ids"}
+					{volist name="$detail.file_array" id="vo"}
+					<div class="layui-col-md4" id="uploadFile{$vo.id}">{:file_card($vo)}</div>
+					{/volist}
+					{/notempty}
+				</div>
+			</td>
+		</tr>
+	</table>
+	<div class="pt-4">
+		<input type="hidden" name="id" value="{$detail.id|default=0}"/>
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+	</div>
+</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	var moduleInit = ['tool','oaPicker','uploadPlus'];
+
+	function gouguInit() {
+		var form = layui.form, tool = layui.tool,laydate = layui.laydate,uploadPlus = layui.uploadPlus;
+		
+		form.on('radio(types)', function (data) {
+			$('#pageTable').attr('class','layui-table layui-table-form layui-table-'+data.value);
+		});
+		// 日期范围 - 左右面板独立选择模式
+		laydate.render({
+			elem: '#range',
+			range: ['#start_time', '#end_time']
+		});
+		
+		//附件上传
+		var attachment = new uploadPlus({
+			"target":'uploadBtn',
+			"targetBox":'uploadBox'
+		});
+		
+		//添加计划选项表格
+		$('#planAdd').on('click',function(){
+			var html = '';
+			html += '<tr class="plan-tr">\
+						<td><input type="text" name="plan_title[]" value="" class="layui-input" lay-verify="required" lay-reqText="请完培训阶段名称"></td>\
+						<td><input type="text" name="plan_time[]" value="" class="layui-input" lay-verify="required" lay-reqText="请完善培训具体时间"></td>\
+						<td><input type="text" name="plan_content[]" value="" class="layui-input" lay-verify="required" lay-reqText="请完善培训内容"></td>\
+						<td>\
+							<input type="text" name="plan_lecturer[]" value="" class="layui-input picker-admin" lay-verify="required" lay-reqText="请完善培训师">\
+							<input type="hidden" name="plan_lecturer_id[]" value="0">\
+						</td>\
+						<td><input type="text" name="plan_types[]" value="" class="layui-input" lay-verify="required" lay-reqText="请完善执行方式"></td>\
+						<td><input type="text" name="plan_result[]" value="" class="layui-input"></td>\
+						<td><a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a></td>\
+					</tr>';
+			$('#planTable').append(html);
+			form.render();
+		});	
+
+		$('#planTable').on('click', '[lay-event="del"]', function() {
+			if($('.plan-tr').length<2){
+				layer.msg('至少保留一个培训计划选项');
+				return false;
+			}
+			$(this).parents('.plan-tr').remove();
+		});
+		
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			if(data.field.types==1 && data.field.departments==''){
+				layer.msg('请完善参与的培训部门');
+				return false;
+			}
+			if(data.field.types==2 && data.field.positions==''){
+				layer.msg('请完善参与的培训岗位');
+				return false;
+			}
+			if(data.field.types==3 && data.field.unames==''){
+				layer.msg('请完善参与的培训人员');
+				return false;
+			}
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.sideClose(1000);
+				}
+			}
+			let clickbtn = $(this);
+			tool.post("/train/train/add", data.field, callback,clickbtn);
+			return false;
+		});
+	}
+</script>
+{/block}
+<!-- /脚本 -->

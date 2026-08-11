@@ -1,0 +1,151 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+.course-content{font-size:14px; line-height:1.6; padding:0 16px}
+.course-content p{padding:5px 0}
+.course-content img{vertical-align:top; width: 100%!important; height:auto!important;}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">
+	<h3 class="pb-2">课程详情</h3>
+    <table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray">课程标题</td>
+			<td colspan="5">{$detail.title}</td>
+			<td class="layui-td-gray" rowspan="4">缩略图</td>
+			<td rowspan="4" style="width: 192px;padding:0 12px">
+				<div class="layui-upload-list" id="demo1" style="width: 200px; height:116px; overflow: hidden;">
+					<img src="{:get_file($detail.thumb)}" style="max-width: 100%; height:116px" onerror="javascript:this.src='/static/home/images/nonepic600x600.jpg';this.onerror=null;" />
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">课程分类</td>
+			<td>{$detail.cate}</td>
+			<td class="layui-td-gray">课程类型</td>
+			<td>{$detail.typestr}</td>
+			<td class="layui-td-gray">发布状态</td>
+			<td>
+				{eq name="$detail.status" value="1"}<span class="green">已上架</span>{/eq}
+				{eq name="$detail.status" value="0"}<span class="red">已下架</span>{/eq}
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">所属讲师</td>
+			<td>{$detail.lecturer}</td>
+			<td class="layui-td-gray">课程课时</td>
+			<td>{:getTimeBySec($detail.duration,false)}</td>
+			<td class="layui-td-gray">课程学分</td>
+			<td>{$detail.credit}</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">学习对象</td>
+			<td colspan="5">{$detail.types_learn}</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">简短介绍</td>
+			<td colspan="7"><pre style="font-family:inherit">{$detail.desc}</pre></td>
+		</tr>
+		{notempty name="$detail.courseware"}
+		<tr>
+			<td class="layui-td-gray">关联课件</td>
+			<td colspan="7" style="line-height:inherit">
+				<div class="layui-row">
+					{volist name="$detail.file_array" id="vo"}
+						<div class="layui-col-md4" id="uploadFile{$vo.id}">{:file_card($vo,'view')}</div>
+					{/volist}
+				</div>
+			</td>
+		</tr> 
+		{/notempty}
+		{notempty name="$detail.paper_array"}
+		<tr>
+			<td class="layui-td-gray">关联考试</td>
+			<td colspan="7">
+				<table class="layui-table layui-table-min">
+					<tr>
+						<th width="100">编号</th>
+						<th>标题</th>
+						<th width="150">考试时长</th>
+						<th width="100">总分</th>
+					</tr>
+					{volist name="$detail.paper_array" id="vo"}
+						<tr>
+							<td>{$vo.id}</td>
+							<td style="text-align:left;">{$vo.title}</td>
+							<td>{:getTimeBySec($vo.duration)}</td>
+							<td>{$vo.total_num}</td>
+						</tr>
+					{/volist}
+				</table>
+			</td>
+		</tr> 
+		{/notempty}
+    </table>
+	
+	<div class="layui-tabs" lay-filter="papertab" style="background-color:#fff; border:1px solid #eee;margin-top:12px">
+		<ul class="layui-tabs-header">
+			<li class="layui-this">课程介绍</li>
+			<li>课程章节</li>
+		</ul>
+		<div class="layui-tabs-body">
+			<div class="course-content layui-tabs-item layui-show">
+				{$detail.content|raw}
+			</div>
+			
+			<div class="layui-tabs-item">				
+				{empty name="$section"}
+				<div style="color:#999; padding:12px 0; text-align:center;">
+					暂无课程章节
+				</div>
+				{else/}
+				{volist name="$section" id="vo"}
+				<div class="question-item">
+					<div class="px-3">
+						<strong>{$vo.title}</strong>
+					</div>
+					<div style="margin:0 12px">
+						<table class="layui-table layui-table-min">
+							<tr>
+								<th width="100">内容编号</th>
+								<th>内容名称</th>
+								<th width="100">学分</th>
+								<th width="150">课时</th>
+								<th width="100">类型</th>
+							</tr>
+							{volist name="$vo.material" id="voo"}
+							<tr>
+								<td>{$voo.id}</td>
+								<td style="text-align:left;">{$voo.title}</td>
+								<td>{$voo.integral}</td>
+								<td>{:getTimeBySec($voo.duration)}</td>
+								<td>{$voo.type_str}</td>
+							</tr>
+							{/volist}
+						</table>
+					</div>
+				</div>
+				{/volist}
+				{/empty}
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+const moduleInit = ['tool'];
+function gouguInit() {
+	var form = layui.form,tool=layui.tool;	
+
+
+  }
+
+</script>
+{/block}
+<!-- /脚本 -->

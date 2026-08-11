@@ -1,0 +1,238 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+.add-exam-title{padding:16px 24px 8px; font-size:17px; line-height:27px;}
+.add-exam-title input{width:500px; padding:10px 6px; font-size:14px; border:1px solid #ddd;}
+.add-exam-ops{padding:3px 15px; font-size:14px; line-height:27px; color:#999;}
+.add-exam-ops input.examination-items{width:390px; padding:8px 6px; font-size:14px; border:1px solid #ddd;margin-right:8px;}
+.add-exam-ops label {font-size: 14px;margin-left: 10px;}
+.add-exam-btn{padding:10px 15px 0;}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<form class="layui-form p-page">
+	<h3 class="pb-2">{notempty name="$question"}编辑考题{else/}新增考题{/notempty}</h3>
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray">所属分类<font>*</font></td>
+			<td>
+			  <select name="cate_id" lay-verify="required" lay-reqText="请输入所属分类">
+				<option value="">请选择所属分类</option>
+				{volist name=":get_base_data('question_cate')" id="v"}
+				<option value="{$v.id}" {notempty name="$question"}{eq name="$v.id" value="$question.cate_id"} selected{/eq}{/notempty}>{$v.title}</option>
+				{/volist}
+			  </select>
+			</td>
+			<td class="layui-td-gray">难易度<font>*</font></td>
+			<td>
+			  <select name="level" lay-verify="required" lay-reqText="请输入难易度">
+				<option value="">请选择难易度</option>
+				{notempty name="$question"}
+				{volist name=":get_question_level(1)" id="v"}
+					<option value="{$v.id}" {eq name="$question.level" value="$v.id"} selected{/eq}>{$v.title}</option>
+				{/volist}
+				{else/}
+				{volist name=":get_question_level(1)" id="v"}
+					<option value="{$v.id}"}>{$v.title}</option>
+				{/volist}
+				{/notempty}
+			  </select>
+			</td>
+			<td class="layui-td-gray">考题分数<font>*</font></td>
+			<td><input type="text" name="score" placeholder="请输入分数" class="layui-input" value="{$question.score|default='1'}"  lay-verify="required|number" lay-reqText="请输入分数"></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">考题题干<font>*</font></td>
+			<td colspan="3"><input type="text" name="title" placeholder="请输入题干" class="layui-input" value="{$question.title|default=''}" lay-verify="required" lay-reqText="请输入考题题干"></td>
+			<td class="layui-td-gray">考题类型</td>
+			<td>{:question_types_name($types)}</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">题干描述</td>
+			<td colspan="5">
+			  <textarea placeholder="请输入内容" class="layui-textarea" name="desc">{$question.desc|default=''}</textarea>
+			</td>
+		</tr>
+		{if condition="($types lt 4)"}
+		<tr>
+			<td class="layui-td-gray" style="vertical-align:top;">考题选项<font>*</font></td>
+			<td colspan="5">
+			  <div id="selectDiv" style="padding:12px 0; background-color:#f9f9f9; border:1px solid #eeeeee">
+				{empty name="$question"}
+				<div class="add-exam-ops">
+					<div class="layui-input-inline">
+						<input type="text" class="examination-items" {eq name="$types" value="1"}value="正确" readonly{/eq} placeholder="请输入选项内容" lay-verify="required" lay-reqText="请输入选项内容" />
+					</div>
+					<div class="layui-input-inline">
+						<span exam-del="ops" class="layui-btn layui-btn-danger layui-btn-sm">删除</span>
+					</div>
+					<div class="layui-input-inline">
+						<label><input type="checkbox" name="is_check" lay-ignore> 是答案</label>
+					</div>
+				</div>
+				<div class="add-exam-ops">
+					<div class="layui-input-inline">
+						<input type="text" class="examination-items" {eq name="$types" value="1"}value="错误" readonly{/eq} placeholder="请输入选项内容" lay-verify="required" lay-reqText="请输入选项内容" />
+					</div>
+					<div class="layui-input-inline">
+						<span exam-del="ops" class="layui-btn layui-btn-danger layui-btn-sm">删除</span>
+					</div>
+					<div class="layui-input-inline">
+						<label><input type="checkbox" name="is_check" lay-ignore> 是答案</label>
+					</div>
+				</div>
+				{else/}
+				{volist name="$question.selectarray" id="vo"}
+				<div class="add-exam-ops">
+					<div class="layui-input-inline">
+						<input type="text" class="examination-items" value="{$vo.title|default=''}" {eq name="$types" value="1"} readonly{/eq} placeholder="请输入选项内容" lay-verify="required" lay-reqText="请输入选项内容" />
+					</div>
+					<div class="layui-input-inline">
+						<span exam-del="ops" class="layui-btn layui-btn-danger layui-btn-sm">删除</span>
+					</div>
+					<div class="layui-input-inline">
+						<label><input type="checkbox" name="is_check" {eq name="$vo.key" value="1"} checked=""{/eq} lay-ignore> 是答案</label>
+					</div>
+				</div>
+				{/volist}
+				{/empty}
+				<div class="add-exam-btn">
+					<span exam-add="ops" class="layui-btn layui-btn-sm"><i class="layui-icon"></i> 添加选项</span>
+				</div>
+				<input type="hidden" name="questionselect" value="{$question.questionselect|default=''}"/>
+			</div>
+			<div class="py-3">
+				答案：<input name="questionanswer" style="display:inline-block; width:200px;" readonly class="layui-input input-answer" type="text" value="{$question.questionanswer|default=''}" lay-verify="required" lay-reqText="请完善答案">
+			</div>
+			</td>
+		</tr>
+		{/if}
+		{if condition="($types eq 4)"}
+		<tr>
+			<td class="layui-td-gray">考题答案<font>*</font></td>
+			<td colspan="5">
+				<input name="questionanswer" class="layui-input input-answer" type="text" value="{$question.questionanswer|default=''}" lay-verify="required" lay-reqText="请完善答案">
+			</td>
+		</tr>
+		{/if}
+		<tr>
+			<td class="layui-td-gray">{$types==5?'评分标准':'考题解析'}</td>
+			<td colspan="5">
+			  <textarea placeholder="请输入内容" class="layui-textarea" name="answerdescribe">{$question.answerdescribe|default=''}</textarea>
+			</td>
+		</tr>
+	</table>
+	<div class="pt-4">
+		<input type="hidden" name="types" value="{$types}" />	
+		<input type="hidden" name="id" value="{$question.id|default=0}">
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+	</div>
+	</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+const moduleInit = ['tool'];
+function gouguInit() {
+	var form = layui.form,tool=layui.tool
+	var types = $('[name="types"]').val();
+			
+	var layBox=$('#selectDiv');
+	layBox.on('click','[exam-add="ops"]',function(){
+		var that=$(this).parent(),len=layBox.find('.add-exam-ops').length;
+		if(len>1 && types == 1){
+			layer.msg('判断题最多只能添加2个选项');
+			return;
+		}
+		if(len>9){
+			layer.msg('最多只能添加10个选项');
+			return;
+		}
+		var ops='<div class="add-exam-ops">\
+				<div class="layui-input-inline">\
+					<input type="text" class="examination-items" placeholder="请输入选项内容" lay-verify="required" lay-reqText="请输入选项内容" />\
+				</div>\
+				<div class="layui-input-inline">\
+					<span exam-del="ops" class="layui-btn layui-btn-danger layui-btn-sm">删除</span>\
+				</div>\
+				<div class="layui-input-inline">\
+					<label><input type="checkbox" name="is_check" lay-ignore> 是答案</label>\
+				</div>\
+			</div>';
+		$(ops).insertBefore(that);
+		form.render();
+	});
+	layBox.on('click','[exam-del="ops"]',function(){
+		var that=$(this);
+		var len=layBox.find('.add-exam-ops').length;
+		if(len<3){
+			layer.msg('至少保留2个选项');
+			return false;
+		}
+		that.parent().parent().remove();
+		var amswers=layBox.find('[type="checkbox"]'),items=new Array(),answer='';
+		for(var i=0;i<amswers.length;i++){
+			if(($(amswers[i]).prop("checked") == true)){
+				items.push(String.fromCharCode(i+65));
+			}
+		}
+		$('.input-answer').val(items.join(''));			
+	});
+	
+	layBox.on('click','[name="is_check"]', function(){
+		if($(this).prop("checked") == true){
+			if(types<3){
+				layBox.find('[name="is_check"]').prop("checked",false);
+				$(this).prop("checked",true);
+			}
+		}
+		var amswers=layBox.find('[name="is_check"]'),items=new Array(),answer='';
+		for(var i=0;i<amswers.length;i++){
+			if(($(amswers[i]).prop("checked") == true)){
+				items.push(String.fromCharCode(i+65));
+			}
+		}
+		$('.input-answer').val(items.join(''));
+	});
+	
+	//监听提交
+	form.on('submit(webform)', function (data) {
+		let callback = function (e) {
+			layer.msg(e.msg);
+			if (e.code == 0) {
+				tool.sideClose(1000);
+			}
+		}
+		data.field.questionselect='';
+		if(data.field.types<4){
+			if(data.field.types==3 && data.field.questionanswer.length<2){
+				layer.msg('多选题型至少要2个答案');
+				return false;
+			}
+			var layBox=$('#selectDiv');
+			var items=[],itemInfo=layBox.find('.examination-items');
+			for(var i=0;i<itemInfo.length;i++){
+				var itemTilte=$(itemInfo[i]).val();
+				if(itemTilte==''){
+					layer.msg('第'+(i+1)+'个选项请输入内容');
+					break;
+				}
+				else{
+					items.push(itemTilte);
+				}
+			}
+			data.field.questionselect = items.join('⊥');
+		}
+		let clickbtn = $(this);
+		tool.post("/exam/question/add", data.field, callback,clickbtn);
+		return false;
+	});
+
+}
+</script>
+{/block}
+<!-- /脚本 -->

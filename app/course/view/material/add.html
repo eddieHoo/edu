@@ -1,0 +1,231 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="body"}
+<form class="layui-form p-page">
+	<h3 class="pb-2">{:content_types_name($types)}学习内容</h3>
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray">内容标题<font>*</font></td>
+			<td><input type="text" name="title" value="{$detail.title|default=''}" lay-verify="required" lay-reqText="请输入内容标题" placeholder="请输入标题" class="layui-input"  autocomplete="off"></td>
+			<td class="layui-td-gray">内容分类<font>*</font></td>
+			<td>
+				{empty name="$detail"}
+				<select name="cate_id" lay-verify="required" lay-reqText="请选择分类">
+					<option value="">请选择分类</option>
+					{volist name=":set_recursion(get_base_data('CourseCate'))" id="v"}
+					<option value="{$v.id}">{$v.title}</option>
+					{/volist}
+				</select>
+				{else/}
+				<select name="cate_id" lay-verify="required" lay-reqText="请选择分类">
+					<option value="">请选择分类</option>
+					{volist name=":set_recursion(get_base_data('CourseCate'))" id="v"}
+					<option value="{$v.id}" {eq name="$v.id" value="$detail.cate_id"} selected{/eq}>{$v.title}</option>
+					{/volist}
+				</select>
+				{/empty}
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">学习积分<font>*</font></td>
+			<td><input type="text" name="integral" lay-verify="required|number" value="{$detail.integral|default=''}" lay-reqText="请输入学习积分" value="5" class="layui-input"></td>
+			<td class="layui-td-gray-2">学习所需时长<font>*</font></td>
+			<td>
+				<div class="layui-input-inline" style="width:60px;">
+					<input type="text" name="hour" lay-verify="required|number" value="{$detail.hour|default=0}" class="layui-input" style="text-align:center; padding-right:10px">
+				</div>
+				小时
+				<div class="layui-input-inline" style="width:60px;">
+					<input type="text" name="minute" lay-verify="required|number" value="{$detail.minute|default=0}" class="layui-input" style="text-align:center; padding-right:10px">
+				</div>
+				分
+				<div class="layui-input-inline" style="width:60px;">
+					<input type="text" name="second" lay-verify="required|number" value="{$detail.second|default=0}" class="layui-input" style="text-align:center; padding-right:10px">
+				</div>
+				秒
+				<span style="color:#999; margin-left:20px;">预估完成该内容学习所需要的时间</span>
+				<span class="layui-btn layui-btn-normal layui-upload-add" id="secondBtn">获取视频时长</span>
+			</td>
+		</tr>
+		{eq name="$types" value="1"}
+		<tr>
+			<td class="layui-td-gray">{:content_types_name($types)}文件<font>*</font></td>
+			<td colspan="3">
+				<div class="layui-input-inline" style="width:500px;">
+					<input type="text" name="url" value="{$detail.url|default=''}" placeholder="请上传{:content_types_name($types)}文件" class="layui-input" lay-verify="required" lay-reqText="请上传{:content_types_name($types)}文件" data-exts='mp4|flv' data-tips = '.mp4、.flv'>
+				</div>
+				<span class="layui-btn layui-btn-normal layui-upload-add" id="uploadBtn">上传{:content_types_name($types)}</span>
+			</td>
+		</tr>
+		{/eq}
+		{eq name="$types" value="2"}
+		<tr>
+			<td class="layui-td-gray">{:content_types_name($types)}文件<font>*</font></td>
+			<td colspan="3">
+				<div class="layui-input-inline" style="width:500px;">
+					<input type="text" name="url" value="{$detail.url|default=''}" placeholder="请上传文件" class="layui-input" lay-verify="required" lay-reqText="请上传{:content_types_name($types)}文件" data-exts='mp3|wav' data-tips = '.mp3、.wav'>
+				</div>
+				<span class="layui-btn layui-btn-normal layui-upload-add" id="uploadBtn">上传{:content_types_name($types)}</span>
+			</td>
+		</tr>
+		{/eq}
+		{eq name="$types" value="3"}
+		<tr>
+			<td class="layui-td-gray">{:content_types_name($types)}文件<font>*</font></td>
+			<td colspan="3">
+				<div class="layui-input-inline" style="width:500px;">
+					<input type="text" name="url" value="{$detail.url|default=''}" placeholder="请上传{:content_types_name($types)}文件" class="layui-input" lay-verify="required" lay-reqText="请上传{:content_types_name($types)}文件" readonly data-exts='pdf' data-tips = '.pdf'>
+				</div>
+				<span class="layui-btn layui-btn-normal layui-upload-add" id="uploadBtn">上传{:content_types_name($types)}</span>
+			</td>
+		</tr>
+		{/eq}
+		{eq name="$types" value="4"}
+		<tr>
+			<td class="layui-td-gray">{:content_types_name($types)}文件<font>*</font></td>
+			<td colspan="3">
+				<div class="layui-input-inline" style="width:500px;">
+					<input type="text" name="url" value="{$detail.url|default=''}" placeholder="请上传{:content_types_name($types)}文件" class="layui-input" lay-verify="required" lay-reqText="请上传{:content_types_name($types)}文件" readonly data-exts='pdf|pptx' data-tips = '.ppt、.pptx'>
+				</div>
+				<span class="layui-btn layui-btn-normal layui-upload-add" id="uploadBtn">上传{:content_types_name($types)}</span>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray red">温馨提示</td>
+			<td colspan="3">
+				<span class="red">PPT文件预览查看使用的是微软官方的接口，如果服务器是局域网，不支持公网访问的，且没配置域名的，PPT文件不支持预览查看，建议使用PDF格式。</span>
+			</td>
+		</tr>
+		{/eq}
+		{eq name="$types" value="5"}
+		<tr>
+			<td class="layui-td-gray">{:content_types_name($types)}文件<font>*</font></td>
+			<td colspan="3">
+				<div class="layui-input-inline" style="width:500px;">
+					<input type="text" name="url" value="{$detail.url|default=''}" placeholder="请上传{:content_types_name($types)}文件" class="layui-input" lay-verify="required" lay-reqText="请上传{:content_types_name($types)}文件" readonly data-exts='doc|docx' data-tips = '.doc、.docx'>
+				</div>
+				<span class="layui-btn layui-btn-normal layui-upload-add" id="uploadBtn">上传{:content_types_name($types)}</span>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray red">温馨提示</td>
+			<td colspan="3">
+				<span class="red">Word文件预览查看使用的是微软官方的接口，如果服务器是局域网，不支持公网访问的，且没配置域名的，Word文件不支持预览查看，建议使用PDF格式。</span>
+			</td>
+		</tr>
+		{/eq}
+		{eq name="$types" value="6"}
+		<tr>
+			<td class="layui-td-gray" style="vertical-align:top">学习内容<font>*</font></td>
+			<td colspan="3">
+				<textarea class="layui-textarea" id="container_content">{$detail.content|default=''}</textarea>
+			</td>
+		</tr>
+		{/eq}
+	</table>
+	<div id="player" style="display:none"></div>
+	<div class="pt-4">
+		<input type="hidden" name="types" value="{$types}">
+		<input type="hidden" name="file_id" value="0">
+		<input type="hidden" name="id" value="{$detail.id|default=0}">
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+	</div>
+</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	var moduleInit = ['tool','uploadPlus','tinymce','tcplayer'];
+	var typeTps = ['','.avi、.wmv、.mpg、.mpeg、.mov、.flv、.mp4','.pdf','.doc、.docx','.ppt、.pptx']
+	var typeExt = ['','.avi,.wmv,.mpg,.mpeg,.mov,.flv,.mp4','.pdf','.doc,.docx','.ppt,.pptx']
+	function gouguInit() {
+		var form = layui.form, tool = layui.tool, element = layui.element, uploadPlus = layui.uploadPlus,tcplayer  = layui.tcplayer;
+		$('#secondBtn').on('click',function(){
+			let url = $('[name="url"]').val();
+			if(url==''){
+				layer.msg('请先完善视频文件地址');
+				return false;
+			}
+			tcplayer.init('player',{
+				contextmenu:true,
+				switch_enabled:false,
+				url: url,
+				canplay:function(duration){
+					if (typeof duration === 'number') {
+						if(duration==0){
+							return false;
+						}
+						var hours = Math.floor(duration / 3600);
+						var minutes = Math.floor((duration % 3600) / 60);
+						var secs = Math.floor(duration % 60);
+  
+						$('[name="hour"]').val(hours);
+						$('[name="minute"]').val(minutes);
+						$('[name="second"]').val(secs);
+					} else {
+						layer.msg('视频加载失败');
+					}
+				}
+			});
+		});
+
+		//上传文件
+		var attachment = new uploadPlus({
+			"url":'/api/index/upload',
+			"target":'uploadBtn',
+			"use":'shard',
+			"shard":{
+				"exts":$('[name="url"]').data('exts'),
+				"exts_tips":$('[name="url"]').data('tips'),
+				"filepath":$('[name="url"]').val(),
+			},
+			"callback":function(data){
+				$('[name="url"]').val(data.filepath);
+			}
+		});
+		
+		var types = $('[name="types"]').val();
+
+		if(types==6){
+			//内容描述富文本编辑器
+			var edit = layui.tinymce.render({
+				selector: '#container_content',
+				menubar:false,
+				toolbar: 'code undo redo removeformat | alignleft aligncenter alignright alignjustify outdent indent | bullist numlist link image',
+				images_upload_url: '/api/index/upload/sourse/tinymce',//图片上传接口
+				height: 552
+			});
+		}		
+		
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			if(types==6){
+				data.field.content = tinyMCE.editors['container_content'].getContent();
+				if (data.field.content == '') {
+					layer.msg('请先完善内容描述');
+					return false;
+				}
+			}
+			if(data.field.hour==0 && data.field.minute == 0 && data.field.second==0){
+				layer.msg('请先完善时长');
+				return false;
+			}
+			
+			data.field.duration = data.field.hour*3600 + data.field.minute*60 + data.field.second*1;
+			
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.sideClose(1000);
+				}
+			}
+			tool.post("/course/material/add", data.field, callback);
+			return false;
+		});
+	}
+</script>
+{/block}
+<!-- /脚本 -->

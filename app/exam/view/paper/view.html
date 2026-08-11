@@ -1,0 +1,127 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+.layui-table-min th{font-size:13px; text-align:center; background-color:#f8f8f8;}
+.layui-table-min td{font-size:13px; padding:6px;text-align:center;}
+.layui-table-min tr.question-none td{padding:10px 0; color:#999}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">
+	<h3 class="pb-2">试卷组卷详情</h3>
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray">所属类别</td>
+			<td>{$detail.cate}</td>			
+			<td class="layui-td-gray-2">开放考试周期</td>
+			<td>{$detail.start_time|to_date='Y-m-d'} 至 {$detail.end_time|to_date='Y-m-d'}</td>
+			<td class="layui-td-gray">考试时长</td>
+			<td>{:getTimeBySec($detail.duration,false)}</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">试卷名称</td>
+			<td colspan="3">{$detail.title}</td>
+			<td class="layui-td-gray">考试性质</td>
+			<td>
+			{eq name="$detail.types" value="1"}<span class="green">常规考试</span>{/eq}
+			{eq name="$detail.types" value="2"}<span class="blue">课程考试</span>{/eq}
+			{eq name="$detail.types" value="3"}<span class="red">培训考试</span>{/eq}
+			</td>
+		</tr>		
+		<tr>
+			<td class="layui-td-gray">试卷总分</td>
+			<td>{$detail.total_score}</td>		
+			<td class="layui-td-gray">优秀分数</td>
+			<td>{$detail.good_score}</td>
+			<td class="layui-td-gray">及格分数</td>
+			<td>{$detail.pass_score}</td>
+		</tr>
+		{eq name="$detail.types" value="3"}
+		<tr>
+			<td class="layui-td-gray">线下培训</td>
+			<td colspan="5">{$detail.train}</td>
+		</tr>
+		{/eq}
+		<tr>
+			<td class="layui-td-gray">考试对象</td>
+			<td colspan="5">{$detail.subjects}</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">阅卷人员</td>
+			<td colspan="5">{$detail.reviewer_names}</td>
+		</tr>
+		{notempty name="$detail.desc"}
+		<tr>
+			<td class="layui-td-gray">考试说明</td>
+			<td colspan="5"><pre style="font-family:inherit">{$detail.desc}</pre></td>
+		</tr>
+		{/notempty}
+		{notempty name="$detail.rules"}
+		<tr>
+			<td class="layui-td-gray">答题规则</td>
+			<td colspan="5"><pre style="font-family:inherit">{$detail.rules}</pre></td>
+		</tr>
+		{/notempty}
+		{notempty name="$detail.methods"}
+		<tr>
+			<td class="layui-td-gray">违规处理办法</td>
+			<td colspan="5"><pre style="font-family:inherit">{$detail.methods}</pre></td>
+		</tr>
+		{/notempty}
+	</table>
+	
+	<h3 class="py-3">试卷试题</h3>
+	
+	{empty name="$section"}
+	<div style="color:#999; padding:10px 0;text-align:center;">
+		暂无试题 <a href="/exam/paper/question?id={$detail.id}" class="layui-btn layui-btn-xs add-trace">去组卷</a>
+	</div>
+	{/empty}
+	{volist name="$section" id="vo"}
+	<div class="question-item">
+		<div>
+			<strong>{$key+1}、{$vo.title}</strong> (试题数量：{$vo.num}{eq name="$detail.question_type" value="3"} <span class="ml-2 gray">具体试题会在考试时随机抽取</span>{/eq}，章节分数：{$vo.score} 分)
+		</div>
+		<div class="add-question-ops">
+			{notempty name="$vo.questions"}
+			<table class="layui-table layui-table-min">
+				<tr>
+					<th width="60">试题编号</th>
+					<th width="100">所属类别</th>
+					<th width="60">类型</th>
+					<th width="60">难度</th>
+					<th width="300">试题题干</th>
+					<th>答案</th>
+					<th width="50">分数</th>
+				</tr>
+				{volist name="$vo.questions" id="voo"}
+				<tr>
+					<td>{$voo.id}</td>
+					<td>{$voo.cate_title}</td>
+					<td>{:question_types_name($voo.types)}</td>
+					<td>{:question_level_name($voo.level)}</td>
+					<td style="text-align:left;">{$voo.title}</td>
+					<td style="text-align:left;">{$voo.questionanswer|default='-'}</td>
+					<td>{$voo.score}</td>
+				</tr>
+				{/volist}
+			</table>
+			{/notempty}
+		</div>
+	</div>
+	{/volist}
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+const moduleInit = ['tool'];
+function gouguInit() {
+
+}
+</script>
+{/block}
+<!-- /脚本 -->

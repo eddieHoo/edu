@@ -1,0 +1,158 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+.certificate-box{width:500px; margin:0 auto; position:relative; line-height:2.2;}
+.certificate-name{width:100%; position:absolute; top:90px; left:0; text-align:center; font-size:42px; font-weight:600; color:#333333}
+.certificate-user{width:100%; position:absolute; top:226px; left:0; text-align:center; font-size:24px; color:#333333}
+.certificate-top{width:400px; position:absolute; top:300px; left:50px; font-size:18px; color:#333333;}
+.certificate-bottom{width:400px; position:absolute; top:436px; left:50px; font-size:18px; color:#333333;}
+.certificate-sign{width:400px; position:absolute; top:526px; left:50px; font-size:14px; color:#333333}
+.certificate-time{width:400px; position:absolute; top:552px; left:50px; font-size:14px; color:#333333}
+.certificate-coder{width:400px; position:absolute; top:606px; left:50px; font-size:12px; color:#666666}
+
+.certificate-box-2 .certificate-name{width:100%; position:absolute; top:90px; left:0; text-align:center; font-size:42px; font-weight:600; color:#1F2B5B}
+.certificate-box-2 .certificate-user{width:100%; position:absolute; top:240px; left:0; text-align:center; font-size:24px; color:#1F2B5B}
+.certificate-box-2 .certificate-top{width:400px; position:absolute; top:310px; left:50px; font-size:18px; color:#1F2B5B}
+.certificate-box-2 .certificate-bottom{width:400px; position:absolute; top:436px; left:50px; font-size:18px; color:#1F2B5B}
+.certificate-box-2 .certificate-sign{width:400px; position:absolute; top:520px; left:50px; font-size:14px; color:#1F2B5B}
+.certificate-box-2 .certificate-time{width:400px; position:absolute; top:548px; left:50px; font-size:14px; color:#1F2B5B}
+.certificate-box-2 .certificate-coder{width:400px; position:absolute; top:588px; left:50px; font-size:12px; color:#666666}
+
+.certificate-box-3 .certificate-name{width:100%; position:absolute; top:90px; left:0; text-align:center; font-size:52px; font-weight:600; color:#C0443A}
+.certificate-box-3 .certificate-top{width:400px; position:absolute; top:236px; left:50px; font-size:18px; color:#333333}
+.certificate-box-3 .certificate-bottom{width:400px; position:absolute; top:396px; left:50px; font-size:18px; color:#333333}
+.certificate-box-3 .certificate-sign{width:400px; position:absolute; top:488px; left:50px; font-size:14px; color:#333333}
+.certificate-box-3 .certificate-time{width:400px; position:absolute; top:516px; left:50px; font-size:14px; color:#333333}
+.certificate-box-3 .certificate-coder{width:400px; position:absolute; top:568px; left:50px; font-size:12px; color:#666666}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<form class="layui-form p-page">
+	<h3 class="pb-2">新增证书模板</h3>
+    <table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray">证书类型</td>
+			<td>
+			  <input type="hidden" name="type" value="{$detail.type}">
+			  {:certificate_types_name($detail.type)}
+			</td>
+			<td rowspan="8">
+			{eq name="$detail.type" value="1"}
+			  <div class="certificate-box certificate-box-1">
+				<img src="{__IMG__}/zhengshu1.jpg" style="max-width:100%"/>
+				<div class="certificate-name">{$detail.name}</div>
+				<div class="certificate-user">黄某某</div>
+				<div class="certificate-top">{$detail.content_top}</div>
+				<div class="certificate-bottom">{$detail.content_bottom}</div>
+				<div class="certificate-sign">签发机构：<span class="certificate-signer">勾股科技信息有限公司</span></div>
+				<div class="certificate-time">签发时间：{$detail.time}</div>
+				<div class="certificate-coder">证书编号：<span class="certificate-code">{$detail.code}</span>10001001</div>
+			  </div>
+			{/eq}
+			{eq name="$detail.type" value="2"}
+			  <div class="certificate-box certificate-box-2">
+				<img src="{__IMG__}/zhengshu2.jpg" style="max-width:100%"/>
+				<div class="certificate-name">{$detail.name}</div>
+				<div class="certificate-user">黄某某</div>
+				<div class="certificate-top">{$detail.content_top}</div>
+				<div class="certificate-bottom">{$detail.content_bottom}</div>
+				<div class="certificate-sign">签发机构：<span class="certificate-signer">勾股科技信息有限公司</span></div>
+				<div class="certificate-time">签发时间：{$detail.time}</div>
+				<div class="certificate-coder">证书编号：<span class="certificate-code">{$detail.code}</span>10001001</div>
+			  </div>
+			{/eq}
+			{eq name="$detail.type" value="3"}
+			  <div class="certificate-box certificate-box-3">
+				<img src="{__IMG__}/zhengshu3.jpg" style="max-width:100%"/>
+				<div class="certificate-name">{$detail.name}</div>
+				<div class="certificate-top">黄某某，{$detail.content_top}</div>
+				<div class="certificate-bottom">{$detail.content_bottom}</div>
+				<div class="certificate-sign">签发机构：<span class="certificate-signer">勾股科技信息有限公司</span></div>
+				<div class="certificate-time">签发时间：{$detail.time}</div>
+				<div class="certificate-coder">证书编号：<span class="certificate-code">{$detail.code}</span>10001001</div>
+			  </div>
+			{/eq}
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">证书状态</td>
+			<td>
+			  <input type="radio" name="status" value="1" title="正常" checked>
+			  <input type="radio" name="status" value="0" title="下架">
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray-2">证书模板标题<font>*</font></td>
+			<td>
+				<input type="text" name="title" value="" lay-verify="required" lay-reqText="请输入证书模板标题" autocomplete="off" placeholder="请输入证书模板标题" class="layui-input">
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">证书名称<font>*</font></td>
+			<td>
+				<input type="text" name="name" value="{$detail.name}" lay-verify="required" lay-reqText="请输入证书名称" autocomplete="off" placeholder="不能超过8个字" class="layui-input on-input" data-input="name">
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray" style="vertical-align:top;">证书主要内容<font>*</font></td>
+			<td>
+				<textarea style="height:150px;" name="content_top" placeholder="不能超过60个字" class="layui-textarea on-input" lay-verify="required" lay-reqText="请完善证书主要内容" data-input="top">{$detail.content_top}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray" style="vertical-align:top;">证书次要内容<font>*</font></td>
+			<td>
+				<textarea  style="height:150px;" name="content_bottom" placeholder="不能超过20个字" class="layui-textarea on-input" lay-verify="required" lay-reqText="请完善证书次要内容"  data-input="bottom">{$detail.content_bottom}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">证书签发机构<font>*</font></td>
+			<td>
+				<input type="text" name="signer" value="勾股科技信息有限公司" lay-verify="required" lay-reqText="请输入证书签发人" autocomplete="off" placeholder="请输入证书签发人" class="layui-input on-input" data-input="signer">
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">证书编号前缀<font>*</font></td>
+			<td>
+				<input type="text" name="code" value="{$detail.code}" lay-verify="required" lay-reqText="请输入证书编号前缀" autocomplete="off" placeholder="请输入证书编号前缀" class="layui-input on-input" data-input="code">
+			</td>
+		</tr>
+    </table>
+    <div class="pt-4">
+      <button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+      <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+const moduleInit = ['tool'];
+function gouguInit() {
+	var form = layui.form,tool=layui.tool;
+	
+	$('body').on('input','.on-input',function(){
+		let type = $(this).data('input');
+		$('.certificate-'+type).html($(this).val());
+	})
+
+	//监听提交
+	form.on('submit(webform)', function (data) {
+		let callback = function (e) {
+			layer.msg(e.msg);
+			if (e.code == 0) {
+				tool.sideClose(1000);
+			}
+		}
+		tool.post("/honor/certificate/add", data.field, callback);
+		return false;
+	});
+
+}
+
+</script>
+{/block}
+<!-- /脚本 -->

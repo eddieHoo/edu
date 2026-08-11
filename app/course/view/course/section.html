@@ -1,0 +1,373 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+html{background-color:#fff;}
+
+.question-item{border-bottom:1px solid #eee;}
+.question-item:last-child{border-bottom:none;}
+.add-question-title{padding:10px;position:relative; font-size:14px; color:#999; background-color:#f8f8f8;}
+.add-question-ops{padding:10px; font-size:14px; color:#999; border-top:1px solid #eee;}
+.add-question-del{position:absolute; right:0; top:-1px; background-color:#FF5722; line-height:25px; font-size:12px; width:42px; text-align:center; color:#fff; border-radius:0 0 0 4px; cursor:pointer;}
+
+.layui-table-min th{font-size:13px; text-align:center; background-color:#f8f8f8;}
+.layui-table-min td{font-size:13px; padding:6px;text-align:center;}
+.layui-table-min tr.question-none td{padding:12px 0; color:#999}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<form class="p-page layui-form">
+	<h3 class="pb-2">{$detail.title}</h3>
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td colspan="6"><strong>课程章节</strong> <span class="layui-btn layui-btn-sm add-section">+ 新增课程章节</span></td>
+		</tr>
+	</table>
+	<div id="questionDiv" style="border:1px solid #eee;border-top:none">
+		{empty name="$section"}
+		<div class="question-item">
+			<div class="add-question-title">
+				章节名称：
+				<div class="layui-input-inline" style="width:360px;">
+					<input type="text" name="title[]" class="layui-input" value="" lay-verify="required" placeholder="请输入章节名称" />
+					<input type="hidden" name="mids[]" value=""/>
+				</div>
+				<div class="layui-input-inline ml-3">
+					<span class="layui-btn layui-btn-normal layui-btn-sm add-question">+ 选择章节内容</span>
+				</div>
+				<div class="add-question-del">删除</div>
+			</div>
+			<div class="add-question-ops">
+				<table class="layui-table layui-table-min" style="margin:0">
+					<tr>
+						<th width="100">内容编号</th>
+						<th width="100">类型</th>
+						<th>名称</th>
+						<th width="100">学分</th>
+						<th width="150">课时时长</th>
+						<th width="120">操作</th>
+					</tr>
+					<tr class="question-none">
+						<td colspan="6">请选择章节内容</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		{else/}
+		{volist name="$section" id="vo"}
+		<div class="question-item">
+			<div class="add-question-title">
+				章节名称：
+				<div class="layui-input-inline" style="width:360px;">
+					<input type="text" name="title[]" class="layui-input" value="{$vo.title}" lay-verify="required" placeholder="请输入章节名称" />
+					<input type="hidden" name="mids[]" value="{$vo.mids}"/>
+				</div>
+				<div class="layui-input-inline ml-3">
+					<span class="layui-btn layui-btn-normal layui-btn-sm add-question">+ 选择章节内容</span>
+				</div>
+				<div class="add-question-del">删除</div>
+			</div>
+			<div class="add-question-ops">
+				<table class="layui-table layui-table-min" style="margin:0">
+					<tr>
+						<th width="100">编号</th>
+						<th width="100">类型</th>
+						<th>名称</th>
+						<th width="100">学分</th>
+						<th width="150">课时时长</th>
+						<th width="120">操作</th>
+					</tr>
+					{empty name="$vo.material"}
+					<tr class="question-none">
+						<td colspan="6">请选择章节内容</td>
+					</tr>
+					{else/}
+					{volist name="$vo.material" id="voo"}
+					<tr class="queue">
+						<td>{$voo.id}</td>
+						<td>{$voo.type_str}</td>
+						<td style="text-align:left;">{$voo.title}</td>
+						<td>{$voo.integral}</td>
+						<td>{:getTimeBySec($voo.duration)}</td>
+						<td><div class="layui-btn-group"><span class="layui-btn layui-btn-xs question-up">上移</span><span class="layui-btn layui-btn-normal layui-btn-xs question-down">下移</span><span class="layui-btn layui-btn-xs layui-btn-danger question-del" data-mid="{$voo.id}">删除</span></div></td>
+					</tr>
+					{/volist}
+					{/empty}
+				</table>
+			</div>
+		</div>
+		{/volist}
+		{/empty}
+	</div>
+	<div class="pt-4">
+		<input type="hidden" name="id" value="{$detail.id}">
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">提交保存</button>
+    </div>	
+</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	const moduleInit = ['tool'];
+	const types = {$detail.types};
+	function gouguInit() {
+		let form = layui.form,tool = layui.tool,table = layui.table;
+		
+		form.on('submit(webform)', function(data){
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.sideClose(1000);				
+				}
+			}
+			tool.post("/course/course/section", data.field, callback);
+			return false;
+		});
+		
+		function get_mids(){
+			let mids = [];
+			$('#questionDiv').find('[name="mids[]"]').each(function(index,item){
+				if($(item).val()!=''){
+					mids.push($(item).val());
+				}
+			})
+			return mids.join(',');
+		}
+		
+		$('#questionDiv').on('click','.add-question',function(){
+			let questionTable;
+			// 设置变量保存选中行信息
+			let ids = new Array();
+			// 保存当前页全部数据id，点击全选时使用
+			let tableIds = new Array();
+			let qBox = $(this).parents('.question-item');
+			let select_ids = qBox.find('[name="mids[]"]').val();
+			layer.open({
+				title: '选择内容',
+				area: ['600px', '590px'],
+				type: 1,
+				content: '<div class="picker-table">\
+					<form class="layui-form pb-2">\
+						<div class="layui-input-inline" style="width:482px;">\
+						<input type="text" name="keywords" placeholder="关键字" class="layui-input" autocomplete="off" />\
+						</div>\
+						<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="search_contract">提交搜索</button>\
+					</form>\
+					<div id="questionTable"></div></div>',
+				success: function () {
+					questionTable = table.render({
+						elem: '#questionTable'
+						, url: '/course/api/get_material'
+						, page: true //开启分页
+						, limit: 10
+						, where:{types:types,mids:get_mids()}
+						, cols: [[
+							{ type: 'checkbox', title: '选择' }
+							, { field: 'id', width: 80, title: '编号', align: 'center' }
+							, { field: 'types_str', width: 80, title: '类型', align: 'center' }
+							, { field: 'title', title: '名称' }
+						]]
+						, done: function (res) {
+							// 设置当前页全部数据id到全局变量
+							tableIds = res.data.map(function (value) {
+								return value.id;
+							});
+							// 设置当前页选中项
+							$.each(res.data, function (idx, val) {
+								if (ids.indexOf(val.id) > -1) {
+									val["LAY_CHECKED"] = 'true';
+									//找到对应数据改变勾选样式，呈现出选中效果
+									let index = val['LAY_TABLE_INDEX'];
+									$('tr[data-index=' + index + '] input[type="checkbox"]').click();
+									form.render('checkbox'); //刷新checkbox选择框渲染
+								}
+							});
+							// 获取表格勾选状态，全选中时设置全选框选中
+							let checkStatus = table.checkStatus('test');
+							if (checkStatus.isAll) {
+								$('.layui-table-header th[data-field="0"] input[type="checkbox"]').prop('checked', true);
+								form.render('checkbox'); //刷新checkbox选择框渲染
+							}
+						}
+					});
+					
+					form.render();
+					//项目搜索提交
+					form.on('submit(search_contract)', function (data) {
+						questionTable.reload({ where: { keywords: data.field.keywords,mids:get_mids()}, page: { curr: 1 } });
+						return false;
+					});					
+					
+					// 监听勾选事件
+					table.on('checkbox(questionTable)', function (obj) {
+						if (obj.checked == true) {
+							if (obj.type == 'one') {
+								ids.push(obj.data.id);
+							} else {
+								for (let i = 0; i < tableIds.length; i++) {
+									//当全选之前选中了部分行进行判断，避免重复
+									if (ids.indexOf(tableIds[i]) == -1) {
+										ids.push(tableIds[i]);
+									}
+								}
+							}
+						} else {
+							if (obj.type == 'one') {
+								let i = ids.length;
+								while (i--) {
+									if (ids[i] == obj.data.id) {
+										ids.splice(i, 1);
+									}
+								}
+							} else {
+								let i = ids.length;
+								while (i--) {
+									if (tableIds.indexOf(ids[i]) != -1) {
+										ids.splice(i, 1);
+									}
+								}
+							}
+						}
+					});
+				},
+				btn: ['确定'],
+				btnAlign: 'c',
+				yes: function () {
+					if (ids.length > 0) {						
+						//console.log(ids);
+						$.ajax({
+							url: "/course/api/get_material",
+							type:'get',
+							data:{ids:ids},
+							success:function(res){
+								layer.closeAll();
+								let tr='';
+								for(var i=0;i<res.data.length;i++){
+									tr+='<tr class="queue">\
+										<td>'+res.data[i].id+'</td>\
+										<td>'+res.data[i].types_str+'</td>\
+										<td style="text-align:left;">'+res.data[i].title+'</td>\
+										<td>'+res.data[i].integral+'</td>\
+										<td>'+res.data[i].duration_str+'</td>\
+										<td><div class="layui-btn-group"><span class="layui-btn layui-btn-xs question-up">上移</span><span class="layui-btn layui-btn-normal layui-btn-xs question-down">下移</span><span class="layui-btn layui-btn-xs layui-btn-danger question-del" data-mid="'+res.data[i].id+'">删除</span></td>\
+									</tr>';
+								}
+								qBox.find('table').append(tr).find('.question-none').remove();
+								if(select_ids==''){
+									qBox.find('[name="mids[]"]').val(ids.join(','));
+								}
+								else{
+									qBox.find('[name="mids[]"]').val(select_ids+','+ids.join(','));
+								}
+								
+							}
+						});
+					}
+					else {
+						layer.msg('请先选择内容');
+						return false;
+					}
+				}
+			})
+		})
+		
+		$('#questionDiv').on('click','.question-del',function(){
+			let qBox = $(this).parents('.question-item');
+			$(this).parents('tr').remove();
+			set_mids(qBox)
+		})
+		
+		$('#questionDiv').on('click','.question-up',function(e){
+			let obj = $(e.target).closest('tr');
+			let qBox = $(this).parents('.question-item');
+            tr_pre($(obj[0]),qBox);
+		})
+		
+		$('#questionDiv').on('click','.question-down',function(e){
+			var obj = $(e.target).closest('tr');
+			let qBox = $(this).parents('.question-item');
+            tr_next($(obj[0]),qBox);
+		})
+		
+		function set_mids(qBox){
+			let items = qBox.find('.question-del');
+			let ids = [];
+			if(items.length>0){
+				items.each(function(index,item){
+					ids.push($(item).data('mid'));
+				})
+			}else{
+				qBox.find('table').append('<tr class="question-none"><td colspan="5">请选择章节内容</td></tr>');
+			}
+			qBox.find('[name="mids[]"]').val(ids.join(','));
+		}
+		
+		function tr_pre(o,qBox) {
+			var pres = o.prevAll('tr.queue');
+			if (pres.length > 0) {
+				var tmp = o.clone(true);
+				var oo = pres[0];
+				o.remove();
+				$(oo).before(tmp);
+				set_mids(qBox);
+			}
+			else{
+				layer.msg('已经第一个了');
+			}
+		}
+
+		function tr_next(o,qBox) {
+			var nexts = o.nextAll('tr.queue');
+			if (nexts.length > 0) {
+				var tmp = o.clone(true);
+				var oo = nexts[0];
+				o.remove();
+				$(oo).after(tmp);
+				set_mids(qBox);
+			}else{
+				layer.msg('已经最后一个了');
+			}
+		}
+		
+		
+		$('body').on('click','.add-section',function(){
+			let itemHtml = `<div class="question-item">
+				<div class="add-question-title">
+					章节名称：
+					<div class="layui-input-inline" style="width:360px;">
+						<input type="text" name="title[]" class="layui-input" value="" lay-verify="required" placeholder="请输入章节名称" />
+						<input type="hidden" name="mids[]" value=""/>
+					</div>				
+					<div class="layui-input-inline ml-3">
+					<span class="layui-btn layui-btn-normal layui-btn-sm add-question">+ 选择章节内容</span>
+					</div>
+					<div class="add-question-del">删除</div>
+				</div>
+				<div class="add-question-ops">
+					<table class="layui-table layui-table-min" style="margin:0">
+						<tr>
+							<th width="100">内容编号</th>
+							<th width="100">类型</th>
+							<th>名称</th>
+							<th width="150">课时时长</th>
+							<th width="150">操作</th>
+						</tr>
+						<tr class="question-none">
+							<td colspan="5">请选择章节内容</td>
+						</tr>
+					</table>
+				</div>
+			</div>`;
+			$('#questionDiv').append(itemHtml);
+			form.render();
+		})
+		
+		$('body').on('click','.add-question-del',function(){
+			$(this).parent().parent().remove();
+		})
+	}
+</script>
+{/block}
+<!-- /脚本 -->

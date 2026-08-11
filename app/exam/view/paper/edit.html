@@ -1,0 +1,282 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+.otypes-table-0 .tr-1-1,
+.otypes-table-0 .tr-1-2,
+.otypes-table-0 .tr-1-3{display:none;}
+
+.otypes-table-1 .tr-1-2,
+.otypes-table-1 .tr-1-3{display:none;}
+
+.otypes-table-2 .tr-1-1,
+.otypes-table-2 .tr-1-3{display:none;}
+
+.otypes-table-3 .tr-1-1,
+.otypes-table-3 .tr-1-2{display:none;}
+
+.types-table-1 .tr-2,
+.types-table-1 .tr-3{display:none;}
+
+.types-table-2 .tr-3,
+.types-table-2 .tr-1,
+.types-table-2 .tr-1-1,
+.types-table-2 .tr-1-2,
+.types-table-2 .tr-1-3{display:none;}
+
+.types-table-3 .tr-2,
+.types-table-3 .tr-1,
+.types-table-3 .tr-1-1,
+.types-table-3 .tr-1-2,
+.types-table-3 .tr-1-3{display:none;}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<form class="p-page layui-form" lay-filter="page-form">
+	<h3 class="pb-2">编辑试卷</h3>
+	<table class="layui-table layui-table-form types-table-{$detail.types|default=1} otypes-table-{$detail.open_types|default=0}" id="pageTable">
+		<tr>
+			<td class="layui-td-gray">试卷名称<font>*</font></td>
+			<td colspan="5"><input type="text" name="title" value="{$detail.title}" placeholder="请输入试卷名称" lay-verify="required" lay-reqText="请输入试卷名称" class="layui-input"></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">所属分类<font>*</font></td>
+			<td>
+			  <select name="cate_id" lay-verify="required" lay-reqText="请选择所属分类">
+				<option value="">请选择所属分类</option>
+				{volist name=":get_base_data('paper_cate')" id="v"}
+				<option value="{$v.id}" {eq name="$detail.cate_id" value="$v.id"}selected{/eq}>{$v.title}</option>
+				{/volist}
+			  </select>
+			</td>
+			<td class="layui-td-gray-2">开放考试周期<font>*</font></td>
+			<td>
+				<div class="layui-input-inline" style="width:132px;">
+					<input type="text" id="start_time" name="start_time" lay-verify="required" value="{$detail.start_time_str}" readonly class="layui-input">
+				</div>
+				至
+				<div class="layui-input-inline" style="width:132px;">
+					<input type="text" id="end_time" name="end_time" lay-verify="required" value="{$detail.end_time_str}" readonly class="layui-input">
+				</div>
+			</td>
+			<td class="layui-td-gray">考试时长<font>*</font></td>
+			<td>
+				<div class="layui-input-inline" style="width:100px;">
+					<input type="text" name="hour" lay-verify="required|number" value="{$detail.hour}" class="layui-input" style="text-align:center; padding-right:10px">
+				</div>
+				小时
+				<div class="layui-input-inline" style="width:100px;">
+					<input type="text" name="minute" lay-verify="required|number" value="{$detail.minute}" class="layui-input" style="text-align:center; padding-right:10px">
+				</div>
+				分
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">试卷总分</td>
+			<td>{$detail.total_score|default=100}</td>
+			<td class="layui-td-gray-2">优秀分数线<font>*</font></td>
+			<td><input type="text" name="good_score" value="{$detail.good_score|default=80}" placeholder="请填写优秀分数" lay-verify="required|number" lay-reqText="请填写优秀分数" class="layui-input"></td>
+			<td class="layui-td-gray-2">及格分数线<font>*</font></td>
+			<td><input type="text" name="pass_score" value="{$detail.pass_score|default=60}" placeholder="请填写及格分数" lay-verify="required|number" lay-reqText="请填写及格分数" class="layui-input"></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">考试性质<font>*</font></td>
+			<td colspan="3">
+				<input type="radio" name="types" lay-filter="types" value="1" title="日常考试" {eq name="$detail.types" value="1"}checked{/eq}>
+				<input type="radio" name="types" lay-filter="types" value="2" title="课程考试" {eq name="$detail.types" value="2"}checked{/eq}>
+				<input type="radio" name="types" lay-filter="types" value="3" title="培训考试" {eq name="$detail.types" value="3"}checked{/eq}>
+			</td>
+			<td class="layui-td-gray">考试次数<font>*</font></td>
+			<td><input type="text" name="exam_times" value="{$detail.exam_times|default=''}" placeholder="请填写考试次数,0为无限制" lay-verify="required|number" lay-reqText="请填写考试次数,0为无限制" class="layui-input"></td>
+		</tr>
+		<tr class="tr-1">
+			<td class="layui-td-gray">考试对象<font>*</font></td>
+			<td colspan="5">
+				<input type="radio" name="open_types" lay-filter="otypes" value="0" title="全部" {eq name="$detail.open_types" value="0"}checked{/eq}>
+				<input type="radio" name="open_types" lay-filter="otypes" value="1" title="部门" {eq name="$detail.open_types" value="1"}checked{/eq}>
+				<input type="radio" name="open_types" lay-filter="otypes" value="2" title="岗位" {eq name="$detail.open_types" value="2"}checked{/eq}>
+				<input type="radio" name="open_types" lay-filter="otypes" value="3" title="员工" {eq name="$detail.open_types" value="3"}checked{/eq}>
+			</td>
+		</tr>
+		<tr class="tr-1 tr-1-1">
+			<td class="layui-td-gray">考试部门<font>*</font></td>
+			<td colspan="5">
+				<input type="text" name="departments" value="{$detail.departments|default=''}" placeholder="请选择参与考试部门" readonly class="layui-input picker-oa" data-types="department" data-type="2">
+				<input type="hidden" name="dids" value="{$detail.dids|default=''}">
+			</td>
+		</tr>
+		<tr class="tr-1 tr-1-2">
+			<td class="layui-td-gray">考试岗位<font>*</font></td>
+			<td colspan="5">
+				<input type="text" name="positions" value="{$detail.positions|default=''}" placeholder="请选择参与考试岗位" readonly class="layui-input picker-oa" data-types="position" data-type="2"">
+				<input type="hidden" name="pids" value="{$detail.pids|default=''}">
+			</td>
+		</tr>
+		<tr class="tr-1 tr-1-3">
+			<td class="layui-td-gray">考试人员<font>*</font></td>
+			<td colspan="5">
+				<input type="text" name="unames" value="{$detail.unames|default=''}" placeholder="请选择参与考试人员" readonly class="layui-input picker-admin" data-type="2">
+				<input type="hidden" name="uids" value="{$detail.uids|default=''}">
+			</td>
+		</tr>	
+		
+		<tr class="tr-2">
+			<td class="layui-td-gray">关联课程<font>*</font></td>
+			<td colspan="5">
+				<input type="text" name="course" value="{$detail.course|default=''}" placeholder="请选择关联课程" readonly class="layui-input picker-course">
+				<input type="hidden" name="course_id" value="{$detail.course_id|default=''}">
+			</td>
+		</tr>
+		<tr class="tr-3">
+			<td class="layui-td-gray">关联培训<font>*</font></td>
+			<td colspan="5">
+				<input type="text" name="train" value="{$detail.train|default=''}" placeholder="请选择关联培训" readonly class="layui-input picker-train">
+				<input type="hidden" name="train_id" value="{$detail.train_id|default=''}">
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">阅卷人员<font>*</font></td>
+			<td colspan="5">
+				<input type="text" name="reviewer_names" value="{$detail.reviewer_names|default=''}" placeholder="请选择阅卷人员" lay-verify="required" lay-reqText="请选择阅卷人员" readonly class="layui-input picker-admin" data-type="2">
+				<input type="hidden" name="reviewer" value="{$detail.reviewer|default=''}">
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">考试说明<font>*</font></td>
+			<td colspan="5">
+			  <textarea placeholder="请输入内容" class="layui-textarea" name="desc" lay-verify="required" lay-reqText="请完善考试说明">{$detail.desc|default=''}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">答题规则</td>
+			<td colspan="5">
+			  <textarea placeholder="请输入内容" class="layui-textarea" name="rules">{$detail.rules|default=''}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">违规处理办法</td>
+			<td colspan="5">
+			  <textarea placeholder="请输入内容" class="layui-textarea" name="methods">{$detail.methods|default=''}</textarea>
+			</td>
+		</tr>
+	</table>
+	<div class="pt-3">
+		<input type="hidden" name="id" value="{$detail.id}">
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+    </div>
+	</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+const moduleInit = ['tool','oaPicker'];
+function gouguInit() {
+	var form = layui.form,tool=layui.tool,table=layui.table,laydate = layui.laydate,oaPicker=layui.oaPicker;
+	
+	form.on('radio(types)', function (data) {
+		let formVal = form.val('page-form');
+		$('#pageTable').attr('class','layui-table layui-table-form types-table-'+formVal.types +' otypes-table-'+formVal.open_types);
+	});
+	
+	form.on('radio(otypes)', function (data) {
+		let formVal = form.val('page-form');
+		$('#pageTable').attr('class','layui-table layui-table-form types-table-'+formVal.types +' otypes-table-'+formVal.open_types);
+	});
+		
+	// 日期范围 - 左右面板独立选择模式
+	laydate.render({
+		elem: '#start_time',
+		type: 'datetime',
+		fullPanel: true,
+		format: 'yyyy-MM-dd HH:mm'
+	});
+	laydate.render({
+		elem: '#end_time',
+		type: 'datetime',
+		fullPanel: true,
+		format: 'yyyy-MM-dd HH:mm'
+	});	
+	
+    $('body').on('click','.picker-train',function () {
+        let that = $(this),ids = [],titles=[],map = {};
+        let callback = function(data){
+            for ( var i = 0; i <data.length; i++){
+                ids.push(data[i].id);
+                titles.push(data[i].title);
+            }
+            that.val(titles.join(','));
+            that.next().val(ids.join(','));
+        }
+        let opts={
+                "title":"选择线下培训",
+                "url": "/train/api/get_train",
+                "ids":"",
+                "titles":"",
+                "area": ['640px', '580px'],
+                "cols":[{field: 'id',width: 80,title:'序号',align:'center'},{field:'title',title:'培训名称'},{field:'start_time_str',title:'开始日期',width: 100,align:'center'}]
+            }
+        oaPicker.picker(opts,1,callback,map);//单选
+    });
+	
+    $('body').on('click','.picker-course',function () {
+        let that = $(this),ids = [],titles=[],map = {};
+        let callback = function(data){
+            for ( var i = 0; i <data.length; i++){
+                ids.push(data[i].id);
+                titles.push(data[i].title);
+            }
+            that.val(titles.join(','));
+            that.next().val(ids.join(','));
+        }
+        let opts={
+                "title":"选择线上课程",
+                "url": "/course/api/get_course",
+                "ids":"",
+                "titles":"",
+                "area": ['640px', '580px'],
+                "cols":[{field: 'id',width: 80,title:'序号',align:'center'},{field:'title',title:'课程名称'},{field:'cate_str',title:'课程分类',width: 100,align:'center'}]
+            }
+        oaPicker.picker(opts,1,callback,map);//单选
+    });
+	
+	form.on('submit(webform)', function(data){
+		if(data.field.hour==0 && data.field.minute == 0){
+			layer.msg('请先完善考试时长');
+			return false;
+		}
+		if(data.field.types==1 && data.field.open_types == 1 && data.field.departments == ''){
+			layer.msg('请先完善参与考试部门');
+			return false;
+		}
+		if(data.field.types==1 && data.field.open_types == 2 && data.field.positions == ''){
+			layer.msg('请先完善参与考试岗位');
+			return false;
+		}
+		if(data.field.types==1 && data.field.open_types == 3 && data.field.unames == ''){
+			layer.msg('请先完善参与考试员工');
+			return false;
+		}
+		if(data.field.types==2 && data.field.course == ''){
+			layer.msg('请先完善关联课程');
+			return false;
+		}
+		if(data.field.types==3 && data.field.train == ''){
+			layer.msg('请先完善关联培训');
+			return false;
+		}
+		data.field.duration = data.field.hour*3600 + data.field.minute*60;
+		let callback = function (e) {
+			layer.msg(e.msg);
+			if (e.code == 0) {
+				tool.sideClose(1000);				
+			}
+		}
+		tool.post("/exam/paper/add", data.field, callback);
+		return false;
+	});
+}
+</script>
+{/block}
+<!-- /脚本 -->

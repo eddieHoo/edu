@@ -1,0 +1,90 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">
+	<form class="layui-form gg-form-bar border-x border-t" lay-filter="barsearchform">
+		<div class="layui-input-inline" style="width:120px">
+			<select name="types">
+				<option value="">请选择类型</option>				
+				{volist name=":get_content_types(1)" id="v"}
+				<option value="{$v.id}">{$v.title}</option>
+				{/volist}
+			</select>
+		</div>
+		<div class="layui-input-inline" style="width:150px;">
+			<select name="cate_id">
+				<option value="">选择课程分类</option>
+				{volist name=":get_base_data('course_cate')" id="v"}
+				<option value="{$v.id}">{$v.title}</option>
+				{/volist}
+			</select>
+		</div>
+		<div class="layui-input-inline" style="width:300px;">
+			<input type="text" name="keywords" placeholder="关键字" class="layui-input" autocomplete="off" />
+		</div>
+		<div class="layui-input-inline" style="width:150px">
+			<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="table-search"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+			<button type="reset" class="layui-btn layui-btn-reset" lay-filter="table-reset">清空</button>
+		</div>
+	</form>
+    <table class="layui-hide" id="test" lay-filter="test"></table>
+</div>
+<script type="text/html" id="toolbarDemo">
+  <div class="layui-btn-container">
+	<h3>课程学习</h3>
+  </div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+	<script>	
+	const course_types = {:json_encode(get_content_types(1),JSON_UNESCAPED_UNICODE)};
+	const moduleInit = ['tool','tablePlus'];
+	function gouguInit() {
+		var table = layui.tablePlus, tool = layui.tool,form = layui.form,dropdown = layui.dropdown,element = layui.element;
+		layui.pageTable = table.render({
+			elem: '#test'
+			,toolbar: '#toolbarDemo'
+			,title:'我的课程列表'
+			,url: "/course/learn/datalist"
+			,page: true
+			,height: 'full-114'
+			,cellMinWidth: 80
+			,cols: [[
+				{field:'id',width:80, title: 'ID号', align:'center'}
+				,{field:'typestr',width:80, title: '类型', align:'center'}
+				,{field:'catestr',width:120, title: '所属分类', align:'center'}
+				,{field:'title',title: '课程名称'}
+				,{field:'progress',title: '学习进度', align: 'center', width: 200, templet: function (d) {
+						var html = '<div style="padding-top:15px"><span style="display:none">'+d.progress+'%</span><div class="layui-progress" lay-filter="ratio" lay-showpercent="true"><div class="layui-progress-bar" lay-percent="'+d.progress+'%"></div></div></div>';
+						return html;
+					}
+				}
+				,{field:'duration',title: '课时',width:120, align:'center',templet: function(d){
+					return d.hour+'小时'+d.minute+'分钟';
+				}}
+				,{field:'credit',width:80, title: '学分', align:'center'}
+				,{field:'lecturer',width:90, title: '讲师', align:'center'}
+				,{field:'create_time',width:150, title: '创建时间', align:'center'}
+				,{width:60,fixed:'right', title: '操作', align:'center',templet: function(d){
+					var html='<a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="view">去学习</a>';
+					return html;
+				}}
+			]],
+			done:function(){
+				element.render('progress', 'ratio')
+			}
+		});
+		
+		table.on('tool(test)',function (obj) {
+			let that = this;
+			if(obj.event === 'view'){
+				tool.side("/course/learn/view?id="+obj.data.id);
+			}
+		});
+	}
+	</script>
+{/block}
+<!-- /脚本 -->

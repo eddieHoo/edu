@@ -1,0 +1,143 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">
+	<form class="layui-form gg-form-bar border-x border-t">
+		<div class="layui-input-inline" style="width:240px;">
+			<input type="text" name="department" placeholder="部门，可多选" readonly class="layui-input picker-oa" data-types="department" data-type="2" />
+			<input name="dids" style="display: none;" value="" />
+		</div>
+		<div class="layui-input-inline" style="width:240px;">
+			<input type="text" name="position" placeholder="岗位，可多选" readonly class="layui-input picker-oa" data-types="position" data-type="2" />
+			<input name="pids" style="display: none;" value="" />
+		</div>
+		<div class="layui-input-inline" style="width:300px;">
+			<input type="text" name="keywords" placeholder="关键字" class="layui-input" autocomplete="off" />
+		</div>
+		<div class="layui-input-inline" style="width:160px;">
+			<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+			<button type="reset" class="layui-btn layui-btn-reset" lay-filter="reset">清空</button>
+		</div>
+	</form>
+    <table class="layui-hide" id="test" lay-filter="test"></table>
+</div>
+<div style="display:none">
+<table id="report-table">
+    <tr>
+        <th rowspan="2">学员ID</th>
+        <th rowspan="2">学员姓名</th>
+        <th rowspan="2">所属部门</th>
+        <th rowspan="2">岗位职称</th>
+        <th rowspan="2">学分</th>
+        <th rowspan="2">积分</th>
+        <th colspan="3">线上课程</th>
+        <th colspan="3">线下培训</th>
+        <th colspan="2">在线考试</th>
+    </tr>
+	<tr>
+        <th>未开始</th>
+        <th>正在学</th>
+        <th>已学完</th>
+        <th>未开始</th>
+        <th>培训中</th>
+        <th>已培训</th>
+        <th>未考试</th>
+        <th>已考试</th>
+    </tr>
+    <tbody id="report-table-tbody"></tbody>
+</table>
+</div>
+<script type="text/html" id="toolbarDemo">
+  <div class="layui-btn-container">
+  	<button class="layui-btn layui-btn-sm excel" type="button">导出EXCEL</button>
+  </div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+	<script>
+	const moduleInit = ['tool','oaPicker','excel'];
+	function gouguInit() {
+		var table = layui.table, tool = layui.tool, form = layui.form, excel = layui.excel;
+		
+		$('body').on('click','.excel',function(){
+			excel.init('report-table',{name: '学习数据统计'});
+		})
+				
+		layui.pageTable = table.render({
+			elem: '#test'
+			,toolbar: '#toolbarDemo'
+			,defaultToolbar: false
+			,title:'学习数据统计'
+			,url: "/honor/statistics/index"
+			,page: false
+			,cellMinWidth: 80
+			,cols: [[
+				{field:'id',width:80, title: '学员ID', align:'center',rowspan: 2}
+				,{field:'name',width:100,title: '学员姓名', align:'center',rowspan: 2,templet: function(d){
+						return '<span style="color: #187FDD; cursor:pointer;" lay-event="view">'+ d.name +'</span>';
+					}
+				}
+				,{field:'department',title: '所属部门',rowspan: 2}
+				,{field:'position',width:120, title: '岗位职称', align:'center',rowspan: 2}
+				,{field:'credit',width:80, title: '学分', align:'center',rowspan: 2}
+				,{field:'integral',width:80, title: '积分', align:'center',rowspan: 2}
+				,{field:'certificate',width:80, title: '证书', align:'center',rowspan: 2}
+				,{field:'course',width:160, title: '线上课程', align:'center',colspan: 3}
+				,{field:'train',width:160, title: '线下培训', align:'center',colspan: 3}
+				,{field:'exam',width:160, title: '在线考试', align:'center',colspan: 2}
+			], [
+				{ field: 'course_a', align: 'center', style: 'color: #16b777;', width: 100, 'title': '未开始' }
+				,{ field: 'course_b', align: 'center', style: 'color: #1e9fff;', width: 100, 'title': '正在学' }
+				,{ field: 'course_c', align: 'center', style: 'color: #ff5722;', width: 100, 'title': '已学完' }
+				,{ field: 'train_a', align: 'center', style: 'color: #16b777;', width: 100, 'title': '未开始' }
+				,{ field: 'train_b', align: 'center', style: 'color: #1e9fff;', width: 100, 'title': '培训中' }
+				,{ field: 'train_c', align: 'center', style: 'color: #ff5722;', width: 100, 'title': '已培训' }
+				,{ field: 'paper_a', align: 'center', style: 'color: #16b777;', width: 100, 'title': '未考试' }
+				,{ field: 'paper_b', align: 'center', style: 'color: #ff5722;', width: 100, 'title': '已考试' }
+			]
+			]
+			,done: function(res, curr, count){
+				let html = '';
+				$.each(res.data,function(index,value){
+					html += '<tr>';
+					html += '<td>'+value.id+'</td>';
+					html += '<td>'+value.name+'</td>';
+					html += '<td>'+value.department+'</td>';
+					html += '<td>'+value.position+'</td>';
+					html += '<td>'+value.credit+'</td>';
+					html += '<td>'+value.integral+'</td>';
+					html += '<td>'+value.course_a+'</td>';
+					html += '<td>'+value.course_b+'</td>';
+					html += '<td>'+value.course_c+'</td>';
+					html += '<td>'+value.train_a+'</td>';
+					html += '<td>'+value.train_b+'</td>';
+					html += '<td>'+value.train_c+'</td>';
+					html += '<td>'+value.paper_a+'</td>';
+					html += '<td>'+value.paper_b+'</td>';
+					html += '</tr>';
+				});
+				$('#report-table-tbody').html(html);
+			}
+		});
+		
+		//单元格工具事件
+		table.on('tool(test)', function(obj){ 
+			var data = obj.data; 
+			var layEvent = obj.event;		 
+			if(layEvent === 'view'){ //查看
+				tool.side('/honor/statistics/overview?id='+obj.data.id);
+			} 
+		});
+		
+		//监听搜索提交
+		form.on('submit(webform)', function(data){
+			layui.pageTable.reload({where:data.field,page:{curr:1}});
+			return false;
+		});
+	}
+	</script>
+{/block}
+<!-- /脚本 -->

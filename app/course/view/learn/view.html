@@ -1,0 +1,143 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+.course-content{font-size:14px; line-height:1.6; padding:0 16px}
+.course-content p{padding:5px 0}
+.course-content img{vertical-align:top; width: 100%!important; height:auto!important;}
+.learn-item{padding:6px; border-radius:3px; cursor:pointer;}
+.learn-item:hover{background-color:#f5f5f5;}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">
+	<h3 class="pb-2">课程详情</h3>
+    <table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray">课程标题</td>
+			<td colspan="5">{$detail.title}</td>
+			<td class="layui-td-gray">课程类型</td>
+			<td>{$detail.typestr}</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">所属讲师</td>
+			<td>{$detail.lecturer}</td>
+			<td class="layui-td-gray">课程分类</td>
+			<td>{$detail.cate}</td>
+			<td class="layui-td-gray">课程课时</td>
+			<td>{:getTimeBySec($detail.duration,false)}</td>
+			<td class="layui-td-gray">课程学分</td>
+			<td>{$detail.credit}</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">简短介绍</td>
+			<td colspan="7"><pre style="font-family:inherit">{$detail.desc}</pre></td>
+		</tr>
+		{notempty name="$detail.courseware"}
+		<tr>
+			<td class="layui-td-gray">关联课件</td>
+			<td colspan="7" style="line-height:inherit">
+				<div class="layui-row">
+					{volist name="$detail.file_array" id="vo"}
+						<div class="layui-col-md4" id="uploadFile{$vo.id}">{:file_card($vo,'view')}</div>
+					{/volist}
+				</div>
+			</td>
+		</tr> 
+		{/notempty}
+		{notempty name="$record"}
+		<tr>
+			<td class="layui-td-gray">学习进度</td>
+			<td colspan="7">
+				<div class="layui-progress layui-progress-big" lay-showpercent="true">
+					<div class="layui-progress-bar layui-bg-blue" lay-percent="{$record.progress}%"></div>
+				</div>
+				<div style="padding-top:6px; font-size:12px;">学习耗时{:getTimeBySec($record.duration)}</div>
+			</td>
+		</tr>
+		{/notempty}
+		{notempty name="$detail.paper_array"}
+		<tr>
+			<td class="layui-td-gray">关联考试</td>
+			<td colspan="7">
+				<table class="layui-table layui-table-min" style="margin:0">
+					<tr>
+						<th width="100">编号</th>
+						<th>标题</th>
+						<th width="150">考试时长</th>
+						<th width="100">总分</th>
+					</tr>
+					{volist name="$detail.paper_array" id="vo"}
+						<tr>
+							<td>{$vo.id}</td>
+							<td style="text-align:left;">{$vo.title}</td>
+							<td>{:getTimeBySec($vo.duration)}</td>
+							<td>{$vo.total_num}</td>
+						</tr>
+					{/volist}
+				</table>
+			</td>
+		</tr> 
+		{/notempty}
+    </table>
+	
+	<div class="layui-tabs" lay-filter="papertab" style="background-color:#fff; border:1px solid #eee;margin-top:12px">
+		<ul class="layui-tabs-header">
+			<li class="layui-this">课程章节</li>
+			<li>课程介绍</li>
+			<li>课程评价</li>
+		</ul>
+		<div class="layui-tabs-body">			
+			<div class="layui-tabs-item layui-show">				
+				{empty name="$section"}
+				<div style="color:#999; padding:12px 0; text-align:center;">
+					暂无课程章节
+				</div>
+				{else/}
+				<div class="layui-collapse" lay-accordion>
+				{volist name="$section" id="vo" key="k"}
+					<div class="layui-colla-item">
+						<div class="layui-colla-title"><strong>{$vo.title}</strong></div>
+						<div class="layui-colla-content {eq name='$k' value='1'}layui-show{/eq}">
+						{volist name="$vo.material" id="voo" key="kk"}
+							<div class="learn-item side-a" data-href="/course/learn/learn/id/{$detail.id}/mid/{$voo.id}"><i class="iconfont icon-jingpinketang"></i> {$k}-{$kk} {$voo.title}
+								<div style="float:right;">
+									{eq name="$voo.is_finish" value="1"}<i class="layui-icon layui-icon-success green"></i>{/eq}
+									{eq name="$voo.is_finish" value="0"}<i class="layui-icon layui-icon-time"></i>{/eq}
+									{:getTimeBySec($voo.duration)}
+								</div>
+							</div>
+						{/volist}					  
+						</div>
+					</div>
+				{/volist}
+				</div>
+				{/empty}
+			</div>
+			<div class="course-content layui-tabs-item">
+				{$detail.content|raw}
+			</div>
+			<div class="course-content layui-tabs-item">
+				<div style="color:#999; padding:12px 0; text-align:center;">
+					暂无课程评价
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+const moduleInit = ['tool'];
+function gouguInit() {
+	var form = layui.form,tool=layui.tool;	
+
+
+  }
+
+</script>
+{/block}
+<!-- /脚本 -->

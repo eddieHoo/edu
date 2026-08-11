@@ -1,0 +1,80 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+.question-title{padding-bottom:10px; font-size:14px; font-weight:600; line-height:1.5;}
+.question-thumb{padding-bottom:10px;}
+.question-thumb img{border-radius:4px}
+.question-desc{padding-bottom:10px; font-size:14px; line-height:1.5; color:#999;}
+.question-ops{padding:3px 0; font-size:14px; line-height:1.5;}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">
+	<h3 class="pb-2">考题详情</h3>
+	<table class="layui-table" style="margin:0">
+		<tr>
+			<td class="layui-td-gray">考题题型</td>
+			<td>
+				{eq name="$detail.types" value="1"}判断题{/eq}
+				{eq name="$detail.types" value="2"}单选题{/eq}
+				{eq name="$detail.types" value="3"}多选题{/eq}
+				{eq name="$detail.types" value="4"}填空题{/eq}
+				{eq name="$detail.types" value="5"}问答题{/eq}
+			</td>
+			<td class="layui-td-gray">所属分类</td>
+			<td>{$detail.cate}</td>
+			<td class="layui-td-gray">难易度</td>
+			<td>
+				{eq name="$detail.level" value="1"} 非常容易{/eq}
+				{eq name="$detail.level" value="2"} 比较容易{/eq}
+				{eq name="$detail.level" value="3"} 常规{/eq}
+				{eq name="$detail.level" value="4"} 较难{/eq}
+				{eq name="$detail.level" value="5"} 非常难{/eq}
+			</td>
+			<td class="layui-td-gray">考题分数</td>
+			<td>{$detail.score}</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">考题内容</td>
+			<td colspan="7">
+				<div class="question-title">{$detail.title}</div>
+				{gt name="$detail.thumb" value="0"}
+				<div class="question-thumb"><img src="{:get_file($detail.thumb)}" style="max-width: 80%; height:auto;" /></div>
+				{/gt}
+				{notempty name="$detail.desc"}
+				<pre class="question-desc" style="font-family:inherit">{$detail.desc}</pre>
+				{/notempty}
+				{if condition="($detail.type lt 4)"}
+					{volist name="$detail.selectarray" id="ops" key="k"}
+					<div class="question-ops">{:decimal2ABC($k-1)}、{$ops.title}</div>
+					{/volist}
+				{/if}
+
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">考题答案</td>
+			<td colspan="7">
+				{$detail.questionanswer}
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">考题解析</td>
+			<td colspan="7"><pre style="font-family:inherit">{$detail.answerdescribe}</pre></td>
+		</tr>
+	</table>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	const moduleInit = ['tool'];
+	function gouguInit() {
+
+	}
+</script>
+{/block}
+<!-- /脚本 -->

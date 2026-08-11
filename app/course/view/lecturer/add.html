@@ -1,0 +1,144 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="body"}
+<form class="layui-form p-page">
+	<h3 class="pb-2">课程讲师</h3>
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray">讲师姓名<font>*</font></td>
+			<td><input type="text" name="name" value="{$detail.name|default=''}" autocomplete="off" placeholder="请输入讲师姓名" lay-verify="required" lay-reqText="请输入讲师姓名" class="layui-input"></td>
+			<td class="layui-td-gray">状态</td>
+			<td>
+				{eq name="$id" value="0"}
+				<input type="radio" name="status" value="1" title="正常" checked>
+				<input type="radio" name="status" value="0" title="下架">
+				{else/}
+				<input type="radio" name="status" value="1" title="正常" {eq name="$detail.status" value="1"} checked{/eq}>
+				<input type="radio" name="status" value="0" title="下架" {eq name="$detail.status" value="0"} checked{/eq}>
+				{/eq}
+			</td>
+			<td class="layui-td-gray" rowspan="4">讲师头像</td>
+			<td rowspan="4" style="width: 182px; height:240px; padding-top:0; overflow: hidden;">
+				<div class="layui-upload">
+				  <div class="layui-upload-list" id="demo1">
+					<img src="{$detail.thumb_str|default=''}" style="max-width: 100%; width: 182px; height:240px;" onerror="javascript:this.src='/static/home/images/nonepic600x600.jpg';this.onerror=null;" />
+					<input type="hidden" name="thumb" value="{$detail.thumb|default=0}">
+				  </div>
+				  <button type="button" class="layui-btn layui-btn-normal layui-btn-sm" id="test1">缩略图（尺寸建议：360x480）</button>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">手机号码<font>*</font></td>
+			<td><input type="text" name="mobile" value="{$detail.mobile|default=''}" autocomplete="off" placeholder="请输入手机号码" lay-verify="required" lay-reqText="请输入手机号码" class="layui-input"></td>
+			<td class="layui-td-gray">性别<font>*</font></td>
+			<td>
+				{eq name="$id" value="0"}
+				<input type="radio" name="sex" value="1" title="男">
+				<input type="radio" name="sex" value="2" title="女">
+				{else/}
+				<input type="radio" name="sex" value="1" title="男" {eq name="$detail.sex" value="1"} checked{/eq}>
+				<input type="radio" name="sex" value="2" title="女" {eq name="$detail.sex" value="2"} checked{/eq}>
+				{/eq}
+			</td>
+		</tr>
+		{eq name="$id" value="0"}
+		<tr>
+			<td class="layui-td-gray">讲师等级<font>*</font></td>
+			<td>
+			  <select name="level" lay-verify="required" lay-reqText="请选择讲师等级">
+				<option value="">请选择讲师等级</option>
+				{volist name=":get_level(1)" id="v"}
+				<option value="{$v.id}">{$v.title}</option>
+				{/volist}
+			  </select>
+			</td>
+			<td class="layui-td-gray">讲师学历<font>*</font></td>
+			<td>
+			  <select name="education" lay-verify="required" lay-reqText="请选择讲师学历">
+				<option value="">请选择讲师学历</option>
+				{volist name=":get_education(1)" id="v"}
+				<option value="{$v.id}">{$v.title}</option>
+				{/volist}
+			  </select>
+			</td>
+		</tr>
+		{else/}
+		<tr>
+			<td class="layui-td-gray">讲师等级<font>*</font></td>
+			<td>
+			  <select name="level" lay-verify="required" lay-reqText="请选择讲师等级">
+				<option value="">请选择讲师等级</option>
+				{volist name=":get_level(1)" id="v"}
+				<option value="{$v.id}" {eq name="$detail.level" value="$v.id"} selected{/eq}>{$v.title}</option>
+				{/volist}
+			  </select>
+			</td>
+			<td class="layui-td-gray">讲师学历<font>*</font></td>
+			<td>
+			  <select name="education" lay-verify="required" lay-reqText="请选择讲师学历">
+				<option value="">请选择讲师学历</option>
+				{volist name=":get_education(1)" id="v"}
+				<option value="{$v.id}" {eq name="$detail.education" value="$v.id"} selected{/eq}>{$v.title}</option>
+				{/volist}
+			  </select>
+			</td>
+		</tr>
+		{/eq}
+		<tr>
+			<td class="layui-td-gray" style="vertical-align:top;">讲师简介<font>*</font></td>
+			<td colspan="3">
+				<textarea name="desc" placeholder="请输入内容" class="layui-textarea" lay-verify="required" lay-reqText="请输入讲师简介">{$detail.desc|default=''}</textarea>
+			</td>
+		</tr>
+
+	</table>
+	<div class="pt-4">
+		<input type="hidden" name="id" value="{$detail.id|default=0}">
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+const moduleInit = ['tool'];
+function gouguInit() {
+	var form = layui.form,tool=layui.tool,upload = layui.upload;
+	
+    //封面上传
+    var uploadInst = upload.render({
+		elem: '#test1'
+		, url: "/api/index/upload"
+		, done: function (res) {
+			layer.msg(res.msg);
+			if (res.code == 0) {
+				//上传成功
+				$('#demo1 input').attr('value', res.data.id);
+				$('#demo1 img').attr('src', res.data.filepath);
+			}
+		}
+    });
+	
+	//监听提交
+	form.on('submit(webform)', function(data){
+		if (!data.field.sex) {
+			layer.msg('请选择讲师性别');
+			return false;
+		}
+		let callback = function (e) {
+			layer.msg(e.msg);
+			if (e.code == 0) {
+				tool.sideClose(1000);
+			}
+		}
+		tool.post("/course/lecturer/add", data.field, callback);
+		return false;
+	});
+}
+</script>
+{/block}
+<!-- /脚本 -->

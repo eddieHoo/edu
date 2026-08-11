@@ -1,0 +1,204 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+  <style>
+	.tree-left{width:220px; float:left; height:100%; overflow: scroll; border:1px solid #eeeeee; background-color:#fff; padding:12px 12px 12px 5px;}
+	.tree-left h3{font-size:16px; height:30px; padding-left:10px; font-weight:800}
+  </style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page" style="height:calc(100% - 40px); box-sizing: border-box;">
+	<div class="tree-left">
+		<h3>课程分类</h3>
+		<div id="cate"></div>
+	</div>
+	<div class="body-table" style="margin-left:248px; overflow:hidden;">
+		<form class="layui-form gg-form-bar border-x border-t" lay-filter="barsearchform">
+			<div class="layui-input-inline" style="width:120px">
+				<select name="types">
+					<option value="">请选择类型</option>				
+					{volist name=":get_content_types(1)" id="v"}
+					<option value="{$v.id}">{$v.title}</option>
+					{/volist}
+				</select>
+			</div>
+			<div class="layui-input-inline" style="width:300px;">
+				<input type="text" name="keywords" placeholder="关键字" class="layui-input" autocomplete="off" />
+			</div>
+			<div class="layui-input-inline" style="width:150px">
+				<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="table-search"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+				<button type="reset" class="layui-btn layui-btn-reset" lay-filter="table-reset">清空</button>
+			</div>
+		</form>
+		<table class="layui-hide" id="test" lay-filter="test"></table>
+	</div>
+</div>
+<script type="text/html" id="toolbarDemo">
+  <div class="layui-btn-container">
+	<button class="layui-btn layui-btn-sm" lay-event="add">
+		<span>+ 新增课程</span>
+		<i class="layui-icon layui-icon-down layui-font-12"></i>
+	</button>
+  </div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+	<script>	
+	const course_types = {:json_encode(get_content_types(1),JSON_UNESCAPED_UNICODE)};
+	const moduleInit = ['tool','tablePlus'];
+	function gouguInit() {
+		var table = layui.tablePlus, tool = layui.tool,tree = layui.tree,form = layui.form,dropdown = layui.dropdown;
+		$.ajax({
+			url: "/course/api/get_coursecate_tree",
+			type:'get',
+			success:function(res){					
+				//仅节点左侧图标控制收缩
+				tree.render({
+					elem: '#cate',
+					data: res.trees,
+					onlyIconControl: true,  //是否仅允许节点左侧图标控制展开收缩
+					click: function(obj){
+						//layer.msg(JSON.stringify(obj.data));
+						$('#cate').find('.layui-tree-main').removeClass('on');
+						$(obj.elem).find('.layui-tree-main').eq(0).addClass('on');
+						layui.pageTable.reload({
+						   where: {cate_id: obj.data.id},
+						   page:{curr:1}
+						});
+						$('[name="keywords"]').val('');
+						$('[name="status"]').val('');
+						form.render();
+					}
+				});	
+			}
+		})
+		
+		$('[lay-filter="reset"]').click(function(){
+			$('#cate').find('.layui-tree-main').removeClass('on');
+		});
+		
+		layui.pageTable = table.render({
+			elem: '#test'
+			,toolbar: '#toolbarDemo'
+			,title:'课程列表'
+			,url: "/course/course/datalist"
+			,page: true
+			,height: 'full-114'
+			,cellMinWidth: 80
+			,cols: [[
+				{field:'id',width:80, title: 'ID号', align:'center'}
+				,{field:'typestr',width:80, title: '类型', align:'center'}
+				,{field:'catestr',width:120, title: '所属分类', align:'center'}
+				,{field:'title',title: '课程名称'}
+				,{field:'duration',title: '课时',width:120, align:'center',templet: function(d){
+					return d.hour+'小时'+d.minute+'分钟';
+				}}
+				,{field:'credit',width:80, title: '学分', align:'center'}
+				,{field:'lecturer',width:90, title: '讲师', align:'center'}
+				,{field:'create_time',width:150, title: '创建时间', align:'center'}
+				,{field:'status', title: '状态',width:80,align:'center',templet: function(d){
+					var html1='<span class="green">已上架</span>';
+					var html2='<span class="red">已下架</span>';
+					if(d.status==1){
+						return html1;
+					}
+					else{
+						return html2;
+					}
+				}}
+				,{width:240,fixed:'right', title: '操作', align:'center',templet: function(d){
+					var html='';
+					var btn0='<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a><a class="layui-btn layui-btn-xs layui-btn-warm" lay-event="section">课时</a>';
+					var btn1='<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="record">学习记录</a>';
+					var btn2='<a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="view">详情</a>';
+					var btn3='<a class="layui-btn layui-btn-xs layui-btn-warm" lay-event="open">上架</a>';
+					var btn4='<a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="disable">下架</a>';
+					var btn5='<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del">删除</a>';
+					if(d.status==0){
+						html = '<div class="layui-btn-group">'+btn0+btn1+btn2+btn3+btn5+'</div>';
+					}
+					else{
+						html = '<div class="layui-btn-group">'+btn1+btn2+btn4+'</div>';
+					}
+					return html;
+				}}
+			]]
+		});
+		
+		table.on('tool(test)',function (obj) {
+			let that = this;
+			if(obj.event === 'edit'){					
+				tool.side("/course/course/add?id="+obj.data.id);
+			}
+			if(obj.event === 'record'){					
+				tool.side("/course/course/record?id="+obj.data.id);
+			}
+			if(obj.event === 'section'){					
+				tool.side("/course/course/section?id="+obj.data.id);
+			}
+			if(obj.event === 'view'){
+				tool.side("/course/course/view?id="+obj.data.id);
+			}
+			if(obj.event === 'disable'){
+				layer.confirm('确定要下架该课程吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layui.pageTable.reload();
+						}
+					}
+					tool.post("/course/course/check", { id: obj.data.id,status: 0}, callback);
+					layer.close(index);
+				});
+			}
+			if(obj.event === 'open'){
+				layer.confirm('确定要上架该课程吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layui.pageTable.reload();
+						}
+					}
+					tool.post("/course/course/check", { id: obj.data.id,status: 1}, callback);
+					layer.close(index);
+				});
+			}
+			if(obj.event === 'del'){
+				layer.confirm('确定要删除该课程吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layui.pageTable.reload();
+						}
+					}
+					tool.delete("/course/course/del", { id: obj.data.id}, callback);
+					layer.close(index);
+				});
+			}
+			return false;
+		});
+		
+		//表头工具栏事件
+		table.on('toolbar(test)', function(obj){
+			var checkStatus = table.checkStatus(obj.config.id); //获取选中行状态
+			var data = checkStatus.data;
+			var that = this;
+			if (obj.event === 'add'){
+				  dropdown.render({
+					elem: that,
+					show: true, // 外部事件触发即显示
+					data: course_types,
+					click: function(obj){
+						tool.side("/course/course/add?types="+obj.id);
+					}
+				  });
+				return;
+			}
+		});
+	}
+	</script>
+{/block}
+<!-- /脚本 -->

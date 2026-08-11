@@ -1,0 +1,660 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+.question-item{border-bottom:1px solid #eee;}
+.question-item:last-child{border-bottom:none;}
+.add-question-title{padding:10px;position:relative; font-size:14px; color:#999; background-color:#f8f8f8;}
+.add-question-ops{padding:10px; font-size:14px; color:#999; border-top:1px solid #eee; background-color:#ffffff;}
+.add-question-del{position:absolute; right:0; top:-1px; background-color:#FF5722; line-height:25px; font-size:12px; width:42px; text-align:center; color:#fff; border-radius:0 0 0 4px; cursor:pointer;}
+.question-del{cursor:pointer;}
+
+.layui-table-min th{font-size:13px; text-align:center; background-color:#f8f8f8;}
+.layui-table-min td{font-size:13px; padding:6px;text-align:center;}
+.layui-table-min tr.question-none td{padding:10px 0; color:#999}
+
+.type-1 .question-type-2{display:none;}
+.type-1 .question-type-3{display:none;}
+.type-1 .question-type-23{display:none;}
+.type-1 .question-type-33{display:none;}
+.type-2 .question-type-3{display:none;}
+.type-2 .question-type-1{display:none;}
+.type-3 .question-type-2{display:none;}
+.type-3 .question-type-1{display:none;}
+.type-3 .question-type-33{display:none;}
+.type-3 .add-question-ops{display:none;}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<form class="p-page layui-form">
+	<h3 class="pb-2">{$detail.title}</h3>
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray">组卷模式<font>*</font></td>
+			<td>
+				<input type="radio" name="question_type" lay-filter="type" value="1" title="人工组卷" {eq name="$detail.question_type" value="1"}checked {/eq}>
+				<input type="radio" name="question_type" lay-filter="type" value="2" title="抽题组卷" {eq name="$detail.question_type" value="2"}checked {/eq}>
+				<input type="radio" name="question_type" lay-filter="type" value="3" title="随机组卷" {eq name="$detail.question_type" value="3"}checked {/eq}>
+			</td>
+			<td class="layui-td-gray">试卷总分<font>*</font></td>
+			<td><input type="text" name="total_score" value="{$detail.total_score|default=100}" placeholder="请填写总分" lay-verify="required|number" lay-reqText="请填写总分" class="layui-input"></td>
+			<td class="layui-td-gray">优秀分数<font>*</font></td>
+			<td><input type="text" name="good_score" value="{$detail.good_score|default=80}" placeholder="请填写优秀分数" lay-verify="required|number" lay-reqText="请填写优秀分数" class="layui-input"></td><td class="layui-td-gray">及格分数<font>*</font></td>
+			<td><input type="text" name="pass_score" value="{$detail.pass_score|default=60}" placeholder="请填写及格分数" lay-verify="required|number" lay-reqText="请填写及格分数" class="layui-input"></td>
+		</tr>
+		<tr>
+			<td colspan="8"><strong>试卷试题</strong> <span class="layui-btn layui-btn-sm add-section">新增试卷章节</span></td>
+		</tr>
+	</table>
+	<div id="questionDiv" class="type-{$detail.question_type}" style="border:1px solid #eee;border-top:none">
+		{empty name="$section"}
+		<div class="question-item">
+			<div class="add-question-title">
+				章节名称:
+				<div class="layui-input-inline" style="width:200px;">
+					<input type="text" name="title[]" class="layui-input" value="" lay-verify="required" placeholder="请输入章节名称" />
+					<input type="hidden" name="qids[]" value=""/>
+				</div>
+				<div class="layui-input-inline ml-1 question-type-23">
+					题型:
+					<div class="layui-input-inline" style="width:95px;">
+						<select name="types[]">
+							<option value="">选择题型</option>
+							<option value="1">判断题</option>
+							<option value="2">单选题</option>
+							<option value="3">多选题</option>
+							<option value="4">填空题</option>
+							<option value="5">问答题</option>
+						</select>
+					</div>
+				</div>
+				<div class="layui-input-inline ml-1 question-type-23">
+					难易度:
+					<div class="layui-input-inline" style="width:95px;">
+						<select name="level[]">
+							<option value="">选择难度</option>
+							<option value="1">简单</option>
+							<option value="2">中等</option>
+							<option value="3">困难</option>
+						</select>
+					</div>
+				</div>
+				<div class="layui-input-inline ml-1 question-type-23">
+						类别:
+						<div class="layui-input-inline" style="width:100px;">
+							<select name="cate_id[]">
+								<option value="">选择类别</option>
+								{volist name=":get_base_data('question_cate')" id="v"}
+								<option value="{$v.id}">{$v.title}</option>
+								{/volist}
+							</select>
+						</div>
+					</div>
+				<div class="layui-input-inline ml-1 question-type-33">
+					试题数量:
+					<div class="layui-input-inline" style="width:50px;">
+						<input type="text" name="num[]" class="layui-input" value="0" placeholder="数量" />
+					</div>
+				</div>
+				<div class="layui-input-inline ml-1">
+					章节分数:
+					<div class="layui-input-inline" style="width:50px;">
+						<input type="text" name="score[]" class="layui-input" value="" placeholder="分数" lay-verify="required|number" />
+					</div>
+				</div>
+				<div class="layui-input-inline ml-1 question-type-1">
+				<span class="layui-btn layui-btn-normal layui-btn-sm add-question">选题</span>
+				</div>
+				<div class="layui-input-inline ml-1 question-type-2">
+				<span class="layui-btn layui-btn-normal layui-btn-sm select-question">抽题</span>
+				</div>
+				<div class="add-question-del">删除</div>
+			</div>
+			<div class="add-question-ops">
+				<table class="layui-table layui-table-min" style="margin:0">
+					<tr>
+						<th width="100">试题编号</th>
+						<th width="100">所属类别</th>
+						<th width="60">题型</th>
+						<th width="60">难度</th>
+						<th>试题题干</th>
+						<th width="60">分数</th>
+						<th width="60">操作</th>
+					</tr>
+					<tr class="question-none">
+						<td colspan="7">请选题</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		{else/}
+		{volist name="$section" id="vo"}
+		<div class="question-item">
+			<div class="add-question-title">
+				章节名称:
+				<div class="layui-input-inline" style="width:200px;">
+					<input type="text" name="title[]" class="layui-input" value="{$vo.title}" lay-verify="required" placeholder="请输入章节名称" />
+					<input type="hidden" name="qids[]" value="{$vo.qids}"/>
+				</div>
+				<div class="layui-input-inline ml-1 question-type-23">
+					题型:
+					<div class="layui-input-inline" style="width:95px;">
+						<select name="types[]">
+							<option value="">选择题型</option>
+							<option value="1" {eq name="$vo.types" value="1"}selected {/eq}>判断题</option>
+							<option value="2" {eq name="$vo.types" value="2"}selected {/eq}>单选题</option>
+							<option value="3" {eq name="$vo.types" value="3"}selected {/eq}>多选题</option>
+							<option value="4" {eq name="$vo.types" value="4"}selected {/eq}>填空题</option>
+							<option value="5" {eq name="$vo.types" value="5"}selected {/eq}>问答题</option>
+						</select>
+					</div>
+				</div>
+				<div class="layui-input-inline ml-1 question-type-23">
+					难易度:
+					<div class="layui-input-inline" style="width:95px;">
+						<select name="level[]">
+							<option value="">选择难度</option>
+							<option value="1" {eq name="$vo.level" value="1"}selected {/eq}>简单</option>
+							<option value="2" {eq name="$vo.level" value="2"}selected {/eq}>中等</option>
+							<option value="3" {eq name="$vo.level" value="3"}selected {/eq}>困难</option>
+						</select>
+					</div>
+				</div>
+				<div class="layui-input-inline ml-1 question-type-23">
+					类别:
+					<div class="layui-input-inline" style="width:100px;">
+						<select name="cate_id[]">
+							<option value="">选择类别</option>
+							{volist name=":get_base_data('question_cate')" id="v"}
+							<option value="{$v.id}" {eq name="$vo.cate_id" value="$v.id"}selected {/eq}>{$v.title}</option>
+							{/volist}
+						</select>
+					</div>
+				</div>
+				<div class="layui-input-inline ml-1 question-type-33">
+					试题数量:
+					<div class="layui-input-inline" style="width:50px;">
+						<input type="text" name="num[]" class="layui-input" value="{$vo.num|default=0}" placeholder="数量" />
+					</div>
+				</div>
+				<div class="layui-input-inline ml-1">
+					章节分数:
+					<div class="layui-input-inline" style="width:50px;">
+						<input type="text" name="score[]" class="layui-input" value="{$vo.score}" placeholder="分数" lay-verify="required|number" />
+					</div>
+				</div>
+				<div class="layui-input-inline ml-1 question-type-1">
+				<span class="layui-btn layui-btn-normal layui-btn-sm add-question">选题</span>
+				</div>
+				<div class="layui-input-inline ml-1 question-type-2">
+				<span class="layui-btn layui-btn-normal layui-btn-sm select-question">抽题</span>
+				</div>
+				<div class="add-question-del">删除</div>
+			</div>
+			<div class="add-question-ops">
+				<table class="layui-table layui-table-min" style="margin:0">
+					<tr>
+						<th width="100">试题编号</th>
+						<th width="100">所属类别</th>
+						<th width="60">题型</th>
+						<th width="60">难度</th>
+						<th>试题题干</th>
+						<th width="60">分数</th>
+						<th width="60">操作</th>
+					</tr>
+					{empty name="$vo.questions"}
+					<tr class="question-none">
+						<td colspan="7">请选题</td>
+					</tr>
+					{else/}
+					{volist name="$vo.questions" id="voo"}
+					<tr>
+						<td>{$voo.id}</td>
+						<td>{$voo.cate_title}</td>
+						<td>{:question_types_name($voo.types)}</td>
+						<td>{:question_level_name($voo.level)}</td>
+						<td style="text-align:left;">{$voo.title}</td>
+						<td>{$voo.score}</td>
+						<td><span class="red question-del" data-qid="{$voo.id}" data-score="{$voo.score}">删除</span></td>
+					</tr>
+					{/volist}
+					{/empty}
+				</table>
+			</div>
+		</div>
+		{/volist}
+		{/empty}
+	</div>
+	<div class="py-3">
+		<input type="hidden" name="id" value="{$detail.id}">
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">提交保存</button>
+    </div>	
+</form>
+<div id="cate_id" style="display:none;">
+<select name="cate_id">
+	<option value="">选择类别</option>
+	{volist name=":get_base_data('paper_cate')" id="v"}
+	<option value="{$v.id}">{$v.title}</option>
+	{/volist}
+</select>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	const moduleInit = ['tool'];
+	function gouguInit() {
+		let form = layui.form,tool = layui.tool,table = layui.table;
+		//选择题型
+		form.on('radio(type)', function (data) {
+			$('#questionDiv').attr('class','type-'+data.value);
+			$('.add-question-ops').html('<table class="layui-table layui-table-min"  style="margin:0">\
+					<tr>\
+						<th width="100">试题编号</th>\
+						<th width="100">所属类别</th>\
+						<th width="60">题型</th>\
+						<th width="60">难度</th>\
+						<th>试题题干</th>\
+						<th width="60">分数</th>\
+						<th width="60">操作</th>\
+					</tr>\
+					<tr class="question-none">\
+						<td colspan="7">请选题</td>\
+					</tr>\
+				</table>');
+			$('[name="qids[]"]').val('');
+			$('[name="score[]"]').val('');
+			$('[name="num[]"]').val(0);
+		});
+		
+		form.on('submit(webform)', function(data){
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.sideClose(1000);				
+				}
+			}
+			tool.post("/exam/paper/question", data.field, callback);
+			return false;
+		});
+		
+		function get_qids(){
+			let qids = [];
+			$('#questionDiv').find('[name="qids[]"]').each(function(index,item){
+				if($(item).val()!=''){
+					qids.push($(item).val());
+				}
+			})
+			return qids.join(',');
+		}
+		
+		$('#questionDiv').on('click','.select-question',function(){
+			let ids = new Array();
+			let qBox = $(this).parents('.question-item');
+			let types = qBox.find('[name="types[]"]').val();
+			let cate_id = qBox.find('[name="cate_id[]"]').val();
+			let level = qBox.find('[name="level[]"]').val();
+			qBox.find('[name="qids[]"]').val('');
+			let num = qBox.find('[name="num[]"]').val();
+			if(num=='' || num==0){
+				layer.msg('请先完善试题数量');
+				return false;
+			}
+			$.ajax({
+				url: "/exam/api/get_question",
+				type:'get',
+				data:{types:types,level:level,limit:num,qids:get_qids(),order:'rand()'},
+				success:function(res){
+					layer.closeAll();
+					if(res.data.length==0){
+						layer.msg('题库中找不到合适的试题，请更改条件重新尝试');
+						return false;
+					}
+					if(res.count<num*1){
+						layer.msg('题库中找不到足够的试题，请更改条件重新尝试');
+						return false;
+					}
+					let tr='<tr>\
+						<th width="100">试题编号</th>\
+						<th width="100">所属类别</th>\
+						<th width="60">题型</th>\
+						<th width="60">难度</th>\
+						<th>试题题干</th>\
+						<th width="60">分数</th>\
+						<th width="60">操作</th>\
+					</tr>';
+					let score=0,new_num=0;
+					for(var i=0;i<res.data.length;i++){
+						ids.push(res.data[i].id);
+						tr+='<tr>\
+							<td>'+res.data[i].id+'</td>\
+							<td>'+res.data[i].cate+'</td>\
+							<td>'+res.data[i].types_str+'</td>\
+							<td>'+res.data[i].level_str+'</td>\
+							<td style="text-align:left;">'+res.data[i].title+'</td>\
+							<td>'+res.data[i].score+'</td>\
+							<td><span class="red question-del" data-qid="'+res.data[i].id+'" data-score="'+res.data[i].score+'">删除</span></td>\
+						</tr>';
+						score+=res.data[i].score*1;
+						new_num++;
+					}
+					qBox.find('table').html(tr);
+					qBox.find('[name="qids[]"]').val(ids.join(','));
+					qBox.find('[name="score[]"]').val(score);
+					qBox.find('[name="num[]"]').val(new_num);					
+				}
+			});		
+		})
+		
+		$('#questionDiv').on('click','.add-question',function(){
+			let questionTable;
+			// 设置变量保存选中行信息
+			let ids = new Array();
+			// 保存当前页全部数据id，点击全选时使用
+			let tableIds = new Array();
+			let qBox = $(this).parents('.question-item');
+			let select_ids = qBox.find('[name="qids[]"]').val();
+			let cate_id = $('#cate_id').html();
+			$(parent.$('.express-close')).addClass('parent-colse');
+			layer.open({
+				title: '选择试题',
+				area: ['820px', '595px'],
+				type: 1,
+				content: '<div class="picker-table">\
+					<form class="layui-form pb-2">\
+						<div class="layui-input-inline" style="width:95px;">\
+							<select name="types">\
+								<option value="">选择题型</option>\
+								<option value="1">判断题</option>\
+								<option value="2">单选题</option>\
+								<option value="3">多选题</option>\
+								<option value="4">填空题</option>\
+								<option value="5">问答题</option>\
+							</select>\
+						</div>\
+						<div class="layui-input-inline" style="width:95px;">\
+							<select name="level">\
+								<option value="">选择难度</option>\
+								<option value="1">简单</option>\
+								<option value="2">中等</option>\
+								<option value="3">困难</option>\
+							</select>\
+						</div>\
+						<div class="layui-input-inline" style="width:100px;">'+cate_id+'</div>\
+						<div class="layui-input-inline" style="width:268px;">\
+						<input type="text" name="keywords" placeholder="关键字" class="layui-input" />\
+						</div>\
+						<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="search_contract">提交搜索</button>\
+						<button type="reset" class="layui-btn layui-btn-reset" lay-filter="picker-reset">清空</button>\
+					</form>\
+					<div id="questionTable"></div></div>',
+				end: function(){
+					$(parent.$('.express-close')).removeClass('parent-colse');
+				},
+				success: function () {
+					questionTable = table.render({
+						elem: '#questionTable'
+						, url: '/exam/api/get_question'
+						, page: true //开启分页
+						, limit: 10
+						, where:{qids:get_qids()}
+						, cols: [[
+							{ type: 'checkbox', title: '选择' }
+							, { field: 'id', width: 80, title: '试题编号', align: 'center' }
+							, { field: 'types_str', width: 80, title: '试题题型', align: 'center' }
+							, { field: 'title', title: '试题题干' }
+							, { field: 'level_str', width: 80, title: '试题难度', align: 'center' }
+							, { field: 'score', width: 60, title: '分数', align: 'center' }
+							, { field: 'cate', width: 90, title: '试题分类', align: 'center' }
+						]]
+						, done: function (res) {
+							// 设置当前页全部数据id到全局变量
+							tableIds = res.data.map(function (value) {
+								return value.id;
+							});
+							// 设置当前页选中项
+							$.each(res.data, function (idx, val) {
+								if (ids.indexOf(val.id) > -1) {
+									val["LAY_CHECKED"] = 'true';
+									//找到对应数据改变勾选样式，呈现出选中效果
+									let index = val['LAY_TABLE_INDEX'];
+									$('tr[data-index=' + index + '] input[type="checkbox"]').click();
+									form.render('checkbox'); //刷新checkbox选择框渲染
+								}
+							});
+							// 获取表格勾选状态，全选中时设置全选框选中
+							let checkStatus = table.checkStatus('test');
+							if (checkStatus.isAll) {
+								$('.layui-table-header th[data-field="0"] input[type="checkbox"]').prop('checked', true);
+								form.render('checkbox'); //刷新checkbox选择框渲染
+							}
+						}
+					});
+					
+					form.render();
+					//项目搜索提交
+					form.on('submit(search_contract)', function (data) {
+						data.field.qids = get_qids();
+						questionTable.reload({where: data.field, page: { curr: 1 } });
+						return false;
+					});	
+
+					$('#questionTable').on('click', '[lay-filter="picker-reset"]', function () {
+						let prev = $(this).prev();
+						if (typeof(prev) != "undefined" ) {
+							setTimeout(function () {
+								prev.click();
+							}, 10)
+						}
+					});					
+					
+					// 监听勾选事件
+					table.on('checkbox(questionTable)', function (obj) {
+						if (obj.checked == true) {
+							if (obj.type == 'one') {
+								ids.push(obj.data.id);
+							} else {
+								for (let i = 0; i < tableIds.length; i++) {
+									//当全选之前选中了部分行进行判断，避免重复
+									if (ids.indexOf(tableIds[i]) == -1) {
+										ids.push(tableIds[i]);
+									}
+								}
+							}
+						} else {
+							if (obj.type == 'one') {
+								let i = ids.length;
+								while (i--) {
+									if (ids[i] == obj.data.id) {
+										ids.splice(i, 1);
+									}
+								}
+							} else {
+								let i = ids.length;
+								while (i--) {
+									if (tableIds.indexOf(ids[i]) != -1) {
+										ids.splice(i, 1);
+									}
+								}
+							}
+						}
+					});
+				},
+				btn: ['确定'],
+				btnAlign: 'c',
+				yes: function () {
+					if (ids.length > 0) {						
+						//console.log(ids);
+						$.ajax({
+							url: "/exam/api/get_question",
+							type:'get',
+							data:{ids:ids},
+							success:function(res){
+								layer.closeAll();
+								console.log(res.data);
+								let tr='',num=0,score=0;
+								for(var i=0;i<res.data.length;i++){
+									tr+='<tr>\
+										<td>'+res.data[i].id+'</td>\
+										<td>'+res.data[i].cate+'</td>\
+										<td>'+res.data[i].types_str+'</td>\
+										<td>'+res.data[i].level_str+'</td>\
+										<td style="text-align:left;">'+res.data[i].title+'</td>\
+										<td>'+res.data[i].score+'</td>\
+										<td><span class="red question-del" data-qid="'+res.data[i].id+'" data-score="'+res.data[i].score+'">删除</span></td>\
+									</tr>';
+									score+=res.data[i].score*1;
+									num++;
+								}
+								qBox.find('table').append(tr).find('.question-none').remove();
+								if(select_ids==''){
+									qBox.find('[name="qids[]"]').val(ids.join(','));
+									qBox.find('[name="score[]"]').val(score);
+									qBox.find('[name="num[]"]').val(num);
+								}
+								else{
+									qBox.find('[name="qids[]"]').val(select_ids+','+ids.join(','));
+									let score_a= qBox.find('[name="score[]"]').val()*1;
+									let num_a= qBox.find('[name="num[]"]').val()*1;
+									qBox.find('[name="score[]"]').val(score_a+score);
+									qBox.find('[name="num[]"]').val(num_a+num);
+								}
+								
+							}
+						});
+					}
+					else {
+						layer.msg('请先选择试题');
+						return false;
+					}
+				}
+			})
+		})
+		
+		$('#questionDiv').on('click','.question-del',function(){
+			let qBox = $(this).parents('.question-item');
+			let select_ids = qBox.find('[name="qids[]"]').val();
+			let select_array = select_ids.split(',');
+			let qid = $(this).data('qid');
+			let score = $(this).data('score');
+			let a = select_array.length;
+			while (a--) {
+				if (select_array[a] == qid) {
+					select_array.splice(a, 1);
+				}
+			}
+			qBox.find('[name="qids[]"]').val(select_array.join(','));
+			let score_a= qBox.find('[name="score[]"]').val();
+			let num_a= qBox.find('[name="num[]"]').val()*1;
+			num_a--;
+			score = score_a*1-score*1;
+			qBox.find('[name="score[]"]').val(score);
+			qBox.find('[name="num[]"]').val(num_a);
+			$(this).parents('tr').remove();
+			
+			let tr = qBox.find('tr');
+			if(tr.length<2){
+				qBox.find('table').append('<tr class="question-none"><td colspan="7">请选题</td></tr>');
+			}			
+		})
+		
+		$('body').on('click','.add-section',function(){
+			let itemHtml = `<div class="question-item">
+				<div class="add-question-title">
+					章节名称:
+					<div class="layui-input-inline" style="width:200px;">
+						<input type="text" name="title[]" class="layui-input" value="" lay-verify="required" placeholder="请输入章节名称" />
+						<input type="hidden" name="qids[]" value=""/>
+					</div>
+					<div class="layui-input-inline ml-1 question-type-23">
+						题型:
+						<div class="layui-input-inline" style="width:95px;">
+							<select name="types[]">
+								<option value="">选择题型</option>
+								<option value="1">判断题</option>
+								<option value="2">单选题</option>
+								<option value="3">多选题</option>
+								<option value="4">填空题</option>
+								<option value="5">问答题</option>
+							</select>
+						</div>
+					</div>
+					<div class="layui-input-inline ml-1 question-type-23">
+						难易度:
+						<div class="layui-input-inline" style="width:95px;">
+							<select name="level[]">
+								<option value="">选择难度</option>
+								<option value="1">简单</option>
+								<option value="2">中等</option>
+								<option value="3">困难</option>
+							</select>
+						</div>
+					</div>
+					<div class="layui-input-inline ml-1 question-type-23">
+						类别:
+						<div class="layui-input-inline" style="width:100px;">
+							<select name="cate_id[]">
+								<option value="">选择类别</option>
+								{volist name=":get_base_data('question_cate')" id="v"}
+								<option value="{$v.id}">{$v.title}</option>
+								{/volist}
+							</select>
+						</div>
+					</div>
+					<div class="layui-input-inline ml-1 question-type-33">
+						试题数量:
+						<div class="layui-input-inline" style="width:50px;">
+							<input type="text" name="num[]" class="layui-input" value="0" placeholder="数量" />
+						</div>
+					</div>
+					<div class="layui-input-inline ml-1">
+						章节分数:
+						<div class="layui-input-inline" style="width:50px;">
+							<input type="text" name="score[]" class="layui-input" value="" placeholder="分数" lay-verify="required|number" />
+						</div>
+					</div>
+					<div class="layui-input-inline ml-1 question-type-1">
+					<span class="layui-btn layui-btn-normal layui-btn-sm add-question">选题</span>
+					</div>
+					<div class="layui-input-inline ml-1 question-type-2">
+					<span class="layui-btn layui-btn-normal layui-btn-sm select-question">抽题</span>
+					</div>
+					<div class="add-question-del">删除</div>
+				</div>
+				<div class="add-question-ops">
+					<table  class="layui-table layui-table-min" style="margin:0">
+						<tr>
+							<th width="100">试题编号</th>
+							<th width="100">所属类别</th>
+							<th width="60">题型</th>
+							<th width="60">难度</th>
+							<th>试题题干</th>
+							<th width="60">分数</th>
+							<th width="60">操作</th>
+						</tr>
+						<tr class="question-none">
+							<td colspan="7">请选题</td>
+						</tr>
+					</table>
+				</div>
+			</div>`;
+			
+			$('#questionDiv').append(itemHtml);
+			form.render();
+		})
+		
+		$('body').on('click','.add-question-del',function(){
+			let item = $('.question-item');
+			if(item.length >1){
+				$(this).parent().parent().remove();
+			}
+			else{
+				layer.msg('至少保留一个章节');
+			}
+		})
+	}
+</script>
+{/block}
+<!-- /脚本 -->

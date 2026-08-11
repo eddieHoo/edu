@@ -1,0 +1,193 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">
+	<h3 class="pb-2">{$detail.title} 授予学员列表 <input type="hidden" name="ids" value="{$detail.ids}"></h3>
+    <table class="layui-hide" id="test" lay-filter="test"></table>
+</div>
+<script type="text/html" id="toolbarDemo">
+  <div class="layui-btn-container">
+  	<button class="layui-btn layui-btn-sm addNew" type="button">+ 授予学员</button>
+  </div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+	<script>
+	const moduleInit = ['tool'];
+	const certificate_id = {$detail.id};
+	function gouguInit() {
+		var table = layui.table, tool = layui.tool, form = layui.form;
+		layui.pageTable = table.render({
+			elem: '#test'
+			,toolbar: '#toolbarDemo'
+			,defaultToolbar: false
+			,title:'证书授予学员列表'
+			,url: "/honor/certificate/users"
+			,where:{id:certificate_id}
+			,page: true
+			,cellMinWidth: 80
+			,cols: [[
+				{field:'user_id',width:80, title: '学员ID', align:'center'}
+				,{field:'user',width:150,title: '学员姓名'}
+				,{field:'code',title: '证书编号',templet: function(d){
+					return d.code+d.certificate_id+d.id;
+				}}
+				,{field:'create_time',width:150,align:'center', title: '授予时间', align:'center'}
+				,{width:150,fixed:'right', title: '操作', align:'center',templet: function(d){
+					var html='';
+					var btn='<a class="layui-btn layui-btn-normal layui-btn-xs" href="/honor/api/certificate_down?id='+d.id+'" target="_blank">下载证书</a>';
+					var btn1='<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="disable">撤销授予</a>';
+					html = '<div class="layui-btn-group">'+btn+btn1+'</div>';
+					return html;
+				}}
+			]]
+		});
+		
+		table.on('tool(test)',function (obj) {
+			if(obj.event === 'disable'){
+				layer.confirm('确定要撤销该学员的证书授予吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							setTimeout(function(){
+								location.reload();
+							},1200)
+						}
+					}
+					tool.delete("/honor/certificate/check_user", { id: obj.data.id}, callback);
+					layer.close(index);
+				});
+			}
+		});
+		
+		$('body').on('click','.addNew',function(){			
+			let userTable;
+			// 设置变量保存选中行信息
+			let ids = new Array();
+			// 保存当前页全部数据id，点击全选时使用
+			let tableIds = new Array();
+			let select_ids = $('[name="ids"]').val();
+			layer.open({
+				title: '选择学员',
+				area: ['500px', '590px'],
+				type: 1,
+				content: '<div class="picker-table">\
+					<form class="layui-form pb-2">\
+						<div class="layui-input-inline" style="width:364px;">\
+						<input type="text" name="keywords" placeholder="关键字" class="layui-input" autocomplete="off" />\
+						</div>\
+						<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="search_contract">提交搜索</button>\
+					</form>\
+					<div id="userTable"></div></div>',
+				success: function () {
+					userTable = table.render({
+						elem: '#userTable'
+						, url: '/api/index/get_personnel'
+						, page: true //开启分页
+						, limit: 10
+						, where:{ids:select_ids}
+						, cols: [[
+							{ type: 'checkbox', title: '选择' }
+							, { field: 'id', width: 80, title: '编号', align: 'center' }
+							, { field: 'name',width: 120,  title: '学员名称' }
+							, { field: 'department', title: '所在部门' }
+						]]
+						, done: function (res) {
+							// 设置当前页全部数据id到全局变量
+							tableIds = res.data.map(function (value) {
+								return value.id;
+							});
+							// 设置当前页选中项
+							$.each(res.data, function (idx, val) {
+								if (ids.indexOf(val.id) > -1) {
+									val["LAY_CHECKED"] = 'true';
+									//找到对应数据改变勾选样式，呈现出选中效果
+									let index = val['LAY_TABLE_INDEX'];
+									$('tr[data-index=' + index + '] input[type="checkbox"]').click();
+									form.render('checkbox'); //刷新checkbox选择框渲染
+								}
+							});
+							// 获取表格勾选状态，全选中时设置全选框选中
+							let checkStatus = table.checkStatus('test');
+							if (checkStatus.isAll) {
+								$('.layui-table-header th[data-field="0"] input[type="checkbox"]').prop('checked', true);
+								form.render('checkbox'); //刷新checkbox选择框渲染
+							}
+						}
+					});
+					
+					form.render();
+					//项目搜索提交
+					form.on('submit(search_contract)', function (data) {
+						userTable.reload({ where: { keywords: data.field.keywords,ids:select_ids}, page: { curr: 1 } });
+						return false;
+					});					
+					
+					// 监听勾选事件
+					table.on('checkbox(userTable)', function (obj) {
+						if (obj.checked == true) {
+							if (obj.type == 'one') {
+								ids.push(obj.data.id);
+							} else {
+								for (let i = 0; i < tableIds.length; i++) {
+									//当全选之前选中了部分行进行判断，避免重复
+									if (ids.indexOf(tableIds[i]) == -1) {
+										ids.push(tableIds[i]);
+									}
+								}
+							}
+						} else {
+							if (obj.type == 'one') {
+								let i = ids.length;
+								while (i--) {
+									if (ids[i] == obj.data.id) {
+										ids.splice(i, 1);
+									}
+								}
+							} else {
+								let i = ids.length;
+								while (i--) {
+									if (tableIds.indexOf(ids[i]) != -1) {
+										ids.splice(i, 1);
+									}
+								}
+							}
+						}
+					});
+				},
+				btn: ['确定'],
+				btnAlign: 'c',
+				yes: function () {
+					if (ids.length > 0) {						
+						//console.log(ids);
+						$.ajax({
+							url: "/honor/certificate/check_user",
+							type:'post',
+							data:{ids:ids.join(','),certificate_id:certificate_id},
+							success:function(res){
+								layer.closeAll();
+								if(select_ids==''){
+									$('[name="ids"]').val(ids.join(','));
+								}
+								else{
+									$('[name="ids"]').val(select_ids+','+ids.join(','));
+								}								
+								layui.pageTable.reload();
+								layer.msg(res.msg);
+							}
+						});
+					}
+					else {
+						layer.msg('请先选择学员');
+						return false;
+					}
+				}
+			})
+		})
+	}
+	</script>
+{/block}
+<!-- /脚本 -->

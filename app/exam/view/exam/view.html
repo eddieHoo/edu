@@ -1,0 +1,298 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<script src="/static/jquery.min.js"></script>
+<style>
+.paper-box{padding-right:430px;}
+.paper-box .layui-card-header h3{font-size:16px; line-height:45px;}
+.paper-box .layui-card-header h3 span{font-size:14px; color:#666;}
+
+.paper-box .paper-box-item{padding-bottom:8px;}
+.paper-box .paper-box-item-t{line-height:32px;}
+.paper-box .paper-box-item-desc{padding:5px 0 5px 18px; font-size:12px; color:#666; line-height:1.5}
+.paper-box .paper-box-item-img{padding:5px;}
+.paper-box .paper-box-item-img img{max-width:90%}
+.paper-box-item-main{padding:3px 0;}
+
+.paper-box .option{line-height:30px; border-radius:3px; display:block; background:#fff; color:#666;padding: 2px 0;padding-left: 15px; position: relative;}
+.paper-box .option label{display:block; margin-left:28px;}
+.paper-box .option:hover{background:#f5f5f5;}
+.paper-box .option-res{line-height:30px; border-radius:3px; display:block; color:#666;padding: 2px 0;padding-left: 15px;}
+
+.paper-box input[type=checkbox],
+.paper-box input[type=radio] {
+    position: relative; width: 18px; height: 18px; border: 1px solid #e0e0e0; outline: 0; border-radius: 50%; background: #fff; vertical-align: middle;box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -moz-transition-duration: 300ms;
+    -webkit-transition-duration: 300ms;
+    transition-duration: 300ms;
+    -webkit-transition-property: border-color;
+    transition-property: border-color;
+}
+
+.paper-box input[type=checkbox]{border-radius:0;}
+.paper-box .checkbox-inline input[type=checkbox],
+.paper-box .radio-inline input[type=radio]{
+	position: absolute; top: 50%;margin-top: -9px; cursor: pointer;
+}
+
+.paper-box input[type=checkbox]:checked,
+.paper-box input[type=radio]:checked {
+	border-color: #16b777; background: #16b777;
+}
+.paper-box input[type=radio]:checked {border: 2px solid #16b777; background: #fff;}
+.paper-box input[type=radio]:checked:before { content: " ";  display: inline-block; height: 10px; width: 10px; background: #16b777;  border-radius: 50%;  position: absolute; top: 2px; margin-left: 2px;}
+.paper-box input[type=checkbox]:checked:before { content: " "; display: inline-block; height: 5px; width: 10px; border-width: 2px 2px 0 0; border-color: #fff;border-style: solid; position: absolute; top: 3px; margin-left: 2px;
+    -webkit-transform: rotate(130deg);
+    -ms-transform: rotate(130deg);
+    -moz-transform: rotate(130deg);
+    transform: rotate(130deg);
+}
+
+.result-box{padding:6px 15px; background-color:#f5f5f5; border-radius:5px;}
+.result-1{background-color:#DFF9E5; color:#16b777;}
+.result-0{background-color:#FFEEEE; color:#f56c6c;}
+.result-box-answer{padding:10px 12px; margin-top:10px; color:#1e9fff; background-color:#f5f5f5;border-radius:5px;}
+
+.answer-box{width:415px;position:fixed; top:15px; right:12px; z-index:996; background-color: #fff; box-shadow: 0 2px 4px 0 rgb(0 0 0 / 6%); border-radius: 4px;user-select: none;}
+.answer-box-title{width:100%; height:38px; line-height:38px; border-bottom:1px solid #f8f8f8; border-radius: 4px 4px 0 0;}
+.answer-box-title h1{width:75px; height:38px; background:#16b777; text-align:center; font-size:16px; display:block; float:left; color:#fff; border-radius: 4px 0 0 0;}
+.answer-box-title p{width:338px; height:38px; text-align:center; display:block; float:right;}
+.answer-box-title p.test_res{font-size:14px;color:#FF2323}
+
+.answer-content{width:100%; height:100%; font-size:14px;}
+.answer-content-t{height:36px; padding:0 12px; line-height:36px;}
+.answer-content-t h2{font-size:14px; font-weight:600}
+.answer-content-t h2 span{margin-left:10px; color:#666;font-size:12px;font-weight:400}
+.answer-sheet{padding:0 12px 6px; border-bottom:1px solid #eeeeee;}
+.answer-sheet ul{text-align:left;}
+.answer-sheet li{display:inline-block; margin-bottom:5px;}
+.answer-sheet li a{height:27px; width:27px; line-height:27px; text-align:center; display:block; background-color:#f8f8f8; border:1px solid #e8e8e8; border-radius:3px;}
+.answer-sheet li a:hover{color:#16b777; border-color: #16b777;}
+.answer-sheet li a.answered{background-color:#16b777; border-color: #16b777; color:#fff;}
+.answer-sheet li a.a_0{background-color:#f56c6c; border:1px solid #f56c6c; color:#fff;}
+.answer-sheet li a.a_1{background-color:#16b777; border:1px solid #16b777; color:#fff;}
+.answer-sheet li a.a_2{background-color:#1e9fff; border:1px solid #1e9fff; color:#fff;}
+
+.answer-tips{padding:5px 12px; line-height:27px;}
+.answer-bottom{padding:8px 12px; height:36px; border:1px solid #eee;}
+.answer-bottom-time{float:left; line-height:36px; font-size:18px;}
+.answer-bottom-btn{float:right;}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">
+	<h3 class="pb-2">试卷信息 【{$detail.title}】</h3>
+	<div class="paper-box">				
+		{volist name="section" id="vo" key="k"}					
+			<div class="layui-card">
+				<div class="layui-card-header">
+					<h3>{$vo.title} <span>（共 {$vo.num} 题， 合计 {$vo.total_score} 分）</span></h3>
+				</div>
+			
+				<div class="layui-card-body">
+				{empty name="vo.questions"}
+					<div style="text-align:center" class="red">考试数据错误。</div>
+				{else/}
+				<ul>
+					{volist name="vo.questions" id="voo" key="kk"}	
+					{if ($voo.types == 1)}
+					<li class="paper-box-item" id="qu_{$k}_{$kk}" data-type="{$voo.types}" data-qid="{$voo.id}" data-answer="">
+						<div class="paper-box-item-t">
+							{$kk}.【判断题】{$voo.title}
+							{notempty name="$voo.desc"}
+							<div class="paper-box-item-desc">{$voo.desc}</div>
+							{/notempty}
+							{gt name="$voo.thumb" value="0"}
+							<div class="paper-box-item-img"><img src="{:get_file($voo.thumb)}"></div>
+							{/gt}
+						</div>
+						<div class="paper-box-item-main">
+							<ul>
+								{volist name="voo.q_select" id="vooo" key="kkk"}
+								<li class="option-res">
+									{:decimal2ABC($key)}、{$vooo}
+								</li>
+								{/volist}													
+							</ul>
+							<div class="result-box result-{$voo.isok}">
+								<span class="green">正确答案：{$voo.questionanswer}</span>
+								<span class="blue ml-4">考生答案：{$voo.answers|default='未答题'}</span>
+								<span class="ml-4">答题结果：{$voo.isok==1?'正确':'错误'}</span>
+								<span class="ml-4">试题分数：{$voo.score}，得分：{$voo.result}</span>
+							</div>
+							{notempty name="$voo.answerdescribe"}
+							<div class="result-box-answer">答案解析：{$voo.answerdescribe}</div>
+							{/notempty}
+						</div>
+					</li>
+					{elseif ($voo.types == 2)}
+					<li class="paper-box-item" id="qu_{$k}_{$kk}" data-type="{$voo.types}" data-qid="{$voo.id}" data-answer="">
+						<div class="paper-box-item-t">
+							{$kk}.【单选题】{$voo.title}
+							{notempty name="$voo.desc"}
+							<div class="paper-box-item-desc">{$voo.desc}</div>
+							{/notempty}
+							{gt name="$voo.thumb" value="0"}
+							<div class="paper-box-item-img"><img src="{:get_file($voo.thumb)}"></div>
+							{/gt}
+						</div>
+						<div class="paper-box-item-main">
+							<ul>
+								{volist name="voo.q_select" id="vooo" key="kkk"}
+								<li class="option-res">
+									{:decimal2ABC($key)}、{$vooo}
+								</li>
+								{/volist}													
+							</ul>
+							<div class="result-box result-{$voo.isok}">
+								<span class="green">正确答案：{$voo.questionanswer}</span>
+								<span class="blue ml-4">考生答案：{$voo.answers|default='未答题'}</span>
+								<span class="ml-4">答题结果：{$voo.isok==1?'正确':'错误'}</span>
+								<span class="ml-4">试题分数：{$voo.score}，得分：{$voo.result}</span>
+							</div>
+							{notempty name="$voo.answerdescribe"}
+							<div class="result-box-answer">答案解析：{$voo.answerdescribe}</div>
+							{/notempty}
+						</div>
+					</li>	
+					{elseif ($voo.types == 3)}
+					<li class="paper-box-item" id="qu_{$k}_{$kk}" data-type="{$voo.types}" data-qid="{$voo.id}" data-answer="">
+						<div class="paper-box-item-t">
+							{$kk}.【多选题】{$voo.title}
+							{notempty name="$voo.desc"}
+							<div class="paper-box-item-desc">{$voo.desc}</div>
+							{/notempty}
+							{gt name="$voo.thumb" value="0"}
+							<div class="paper-box-item-img"><img src="{:get_file($voo.thumb)}"></div>
+							{/gt}
+						</div>
+						<div class="paper-box-item-main">
+							<ul>
+								{volist name="voo.q_select" id="vooo" key="kkk"}
+								<li class="option-res">
+									{:decimal2ABC($key)}、{$vooo}
+								</li>
+								{/volist}													
+							</ul>
+							<div class="result-box result-{$voo.isok}">
+								<span class="green">正确答案：{$voo.questionanswer}</span>
+								<span class="blue ml-4">考生答案：{$voo.answers|default='未答题'}</span>
+								<span class="ml-4">答题结果：{$voo.isok==1?'正确':'错误'}</span>
+								<span class="ml-4">试题分数：{$voo.score}，得分：{$voo.result}</span>
+							</div>
+							{notempty name="$voo.answerdescribe"}
+							<div class="result-box-answer">答案解析：{$voo.answerdescribe}</div>
+							{/notempty}
+						</div>
+					</li>
+					{elseif ($voo.types == 4)}
+					<li class="paper-box-item" id="qu_{$k}_{$kk}" data-type="{$voo.types}" data-qid="{$voo.id}" data-answer="">
+						<div class="paper-box-item-t">
+							{$kk}.【填空题】{$voo.title}
+							{notempty name="$voo.desc"}
+							<div class="paper-box-item-desc">{$voo.desc}</div>
+							{/notempty}
+							{gt name="$voo.thumb" value="0"}
+							<div class="paper-box-item-img"><img src="{:get_file($voo.thumb)}"></div>
+							{/gt}
+						</div>
+						<div class="paper-box-item-main">
+							<div class="result-box result-{$voo.isok}">
+								<span class="green">正确答案：{$voo.questionanswer}</span>
+								<span class="blue ml-4">考生答案：{$voo.answers|default='未答题'}</span>
+								<span class="ml-4">答题结果：{$voo.isok==1?'正确':'错误'}</span>
+								<span class="ml-4">试题分数：{$voo.score}，得分：{$voo.result}</span>
+							</div>
+							{notempty name="$voo.answerdescribe"}
+							<div class="result-box-answer">答案解析：{$voo.answerdescribe}</div>
+							{/notempty}
+						</div>
+					</li>
+					{elseif ($voo.types == 5)}
+					<li class="paper-box-item" id="qu_{$k}_{$kk}" data-type="{$voo.types}" data-qid="{$voo.id}" data-answer="">
+						<div class="paper-box-item-t">
+							{$kk}.【问答题】{$voo.title}
+							{notempty name="$voo.desc"}
+							<div class="paper-box-item-desc">{$voo.desc}</div>
+							{/notempty}
+							{gt name="$voo.thumb" value="0"}
+							<div class="paper-box-item-img"><img src="{:get_file($voo.thumb)}"></div>
+							{/gt}
+						</div>
+						<div class="paper-box-item-main">
+							<div class="result-box result-{$voo.isok}">
+								<pre class="blue" style="font-family:inherit">考生答案：{$voo.answers|default='未答题'}</pre>
+								<div><span>试题分数：{$voo.score}，得分：{eq name="$voo.isok" value="2"}未阅卷{else/}{$voo.result}{/eq}</span></div>
+							</div>							
+							<div class="result-box-answer">评分规则：{$voo.answerdescribe|default="无"}</div>
+						</div>
+					</li>
+					{/if}
+					{/volist}									
+				</ul>
+				{/empty}
+				</div>
+			</div>
+		{/volist}
+	</div>
+		
+		
+	<div class="answer-box">
+		<div class="answer-box-title">
+			<h1>答题卡</h1>
+			<p class="answer-time">考试周期：<strong>{$detail.start_time_str} 至 {$detail.end_time_str}</strong></p>
+		</div>
+		{volist name="section" id="vo" key="k"}					
+		<div class="answer-content">
+			<div class="answer-content-t">
+				<h2>{$vo.title}<span>共 {$vo.num} 题</span></h2>
+			</div>
+			<div class="answer-sheet">
+				{empty name="vo.questions"}
+					<div style="text-align:center" class="red">该章节的试题抽取失败，请联系组卷人员重新选择组卷条件。</div>
+				{else/}
+				<ul>
+					{volist name="vo.questions" id="voo" key="kk"}	
+					<li><a name="qu_{$k}_{$kk}" class="a_{$voo.isok}" href="javascript:go('qu_{$k}_{$kk}');">{$kk}</a></li>
+					{/volist}
+				</ul>
+				{/empty}
+			</div>
+		</div>	
+		{/volist}
+		<div class="answer-tips">
+			<p>温馨提示：红色是答题错误，绿色是答题正确，蓝色是待阅卷</p>
+			<p>试卷概况：总分<strong class="red"> {$detail.total_score} </strong>分，优秀分数线<strong class="blue"> {$detail.good_score} </strong>分，及格分数线<strong class="green"> {$detail.pass_score} </strong>分</p>
+			<p>
+				考试结果：共用时<strong> {:getTimeBySec($record.duration)} </strong>，得分：<strong class="green"> {$record.score} </strong>
+				{eq name="$record.status" value="0"}<span class="red">『未审阅』</span>{/eq}
+				{eq name="$record.status" value="1"}<span class="green">『已审阅』</span>{/eq}
+			</p>
+			<p>审阅意见：{$record.reviewer_remark|default='-'}</p>
+		</div>
+	</div>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+function go(id){
+	  var top = $('#' + id).offset().top;
+	  $('html, body').animate({
+		 scrollTop: top
+	  }, 500)
+}
+const moduleInit = ['tool'];
+function gouguInit() {
+
+}
+</script>
+{/block}
+<!-- /脚本 -->

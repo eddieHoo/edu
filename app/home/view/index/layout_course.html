@@ -1,0 +1,26 @@
+<div class="layui-row layui-col-space16">
+	<div class="layui-col-md12">
+		<div class="layui-card">
+			<div class="layui-card-title">课程学习</div>
+			<div style="padding: 12px;">
+				<table id="course" lay-filter="course" class="layui-hide" style="margin-top:0"></table>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+//项目
+function layoutCourse(table){
+	table.render({
+		elem: '#course'
+		, url: "/course/api/get_course?limit=10" //数据接口
+		, page: false //开启分页
+		, cols: [[ //表头
+			{field: 'id', title: 'ID编号', align: 'center','width': 90}
+			,{field: 'title', title: '课程名称',minWidth:240,templet: '<div><a data-href="/course/learn/view/id/{{d.id}}.html" class="side-a">{{d.title}}</a></div>'}
+			,{field:'typestr',title: '课程类型',width:80,align:'center'}
+			,{field:'catestr',title: '课程分类',width:80,align:'center'}
+		]]
+	});
+}
+</script>

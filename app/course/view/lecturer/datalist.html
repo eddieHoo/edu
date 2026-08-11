@@ -1,0 +1,155 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">
+	<form class="layui-form gg-form-bar border-x border-t" lay-filter="barsearchform">
+		<div class="layui-input-inline" style="width:132px">
+			<select name="level">
+				<option value="">选择讲师等级</option>
+				{volist name=":get_level(1)" id="v"}
+				<option value="{$v.id}">{$v.title}</option>
+				{/volist}
+			</select>
+		</div>
+		<div class="layui-input-inline" style="width:132px">
+			<select name="education">
+				<option value="">选择讲师学历</option>
+				{volist name=":get_education(1)" id="v"}
+				<option value="{$v.id}">{$v.title}</option>
+				{/volist}
+			</select>
+		</div>
+		<div class="layui-input-inline" style="width:120px">
+			<select name="status">
+				<option value="">选择状态</option>
+				<option value="1">正常</option>
+				<option value="0">禁用</option>
+			</select>
+		</div>
+		<div class="layui-input-inline" style="width:300px;">
+			<input type="text" name="keywords" placeholder="讲师姓名/手机号码" class="layui-input" autocomplete="off" />
+		</div>
+		<div class="layui-input-inline" style="width:150px">
+			<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="table-search"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+			<button type="reset" class="layui-btn layui-btn-reset" lay-filter="table-reset">清空</button>
+		</div>
+	</form>
+    <table class="layui-hide" id="test" lay-filter="test"></table>
+</div>
+<script type="text/html" id="toolbarDemo">
+  <div class="layui-btn-container">
+  	<button class="layui-btn layui-btn-sm side-a" type="button" data-href="/course/lecturer/add">+ 添加讲师</button>
+  </div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+	<script>
+	const moduleInit = ['tool','tablePlus'];
+	function gouguInit() {
+		var table = layui.tablePlus, tool = layui.tool, form = layui.form;
+		layui.pageTable = table.render({
+			elem: '#test'
+			,toolbar: '#toolbarDemo'
+			,title:'讲师列表'
+			,url: "/course/lecturer/datalist"
+			,page: true
+			,height: 'full-114'
+			,cellMinWidth: 80
+			,cols: [[
+				{field:'id',width:80, title: 'ID号', align:'center'}
+				,{field:'name',title: '讲师名称'}
+				,{field:'mobile',title: '手机号码',width:120, align:'center'}
+				,{field:'level_str',width:90, title: '讲师等级', align:'center'}
+				,{field:'education_str',width:90, title: '讲师学历', align:'center'}
+				,{field:'count_course',width:90, title: '课程数', align:'center'}
+				,{field:'count_train',width:90, title: '培训数', align:'center'}
+				,{field:'count_student',width:90, title: '学员数', align:'center'}
+				,{field:'sex',width:80,title: '性别', align:'center',templet: function(d){
+					if(d.sex==1){
+						return '<span class="blue">男</span>';
+					}
+					if(d.sex==2){
+						return '<span class="green">女</span>';
+					}
+					else{
+						return '-';
+					}
+				}}
+				,{field:'status', title: '状态',width:80,align:'center',templet: function(d){
+					var html1='<span class="green">正常</span>';
+					var html2='<span class="yellow">禁用</span>';
+					if(d.status==1){
+						return html1;
+					}
+					else{
+						return html2;
+					}
+				}}
+				,{width:168,fixed:'right', title: '操作', align:'center',templet: function(d){
+					var html='';
+					var btn='<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a><a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="view">详情</a>';
+					var btn1='<a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="disable">下架</a>';
+					var btn2='<a class="layui-btn layui-btn-xs" lay-event="open">上架</a>';
+					var btn3='<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del">删除</a>';
+					if(d.status==1){
+						html = '<div class="layui-btn-group">'+btn+btn1+btn3+'</div>';
+					}
+					else{
+						html = '<div class="layui-btn-group">'+btn+btn2+btn3+'</div>';
+					}
+					return html;
+				}}
+			]]
+		});
+		
+		table.on('tool(test)',function (obj) {
+			if(obj.event === 'edit'){					
+				tool.side("/course/lecturer/add?id="+obj.data.id);
+			}
+			if(obj.event === 'view'){					
+				tool.side("/course/lecturer/view?id="+obj.data.id);
+			}
+			if(obj.event === 'disable'){
+				layer.confirm('确定要禁用该讲师吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layui.pageTable.reload();
+						}
+					}
+					tool.post("/course/lecturer/check", { id: obj.data.id,status: 0,title: obj.data.title}, callback);
+					layer.close(index);
+				});
+			}
+			if(obj.event === 'open'){
+				layer.confirm('确定要启用该讲师吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layui.pageTable.reload();
+						}
+					}
+					tool.post("/course/lecturer/check", { id: obj.data.id,status: 1,title: obj.data.title}, callback);
+					layer.close(index);
+				});
+			}
+			if(obj.event === 'del'){
+				layer.confirm('确定要删除该讲师吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layui.pageTable.reload();
+						}
+					}
+					tool.delete("/course/lecturer/delete", { id: obj.data.id,}, callback);
+					layer.close(index);
+				});
+			}
+		});
+	}
+	</script>
+{/block}
+<!-- /脚本 -->

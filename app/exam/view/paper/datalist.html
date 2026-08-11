@@ -1,0 +1,159 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">
+	<form class="layui-form gg-form-bar border-x border-t">
+		<div class="layui-input-inline" style="width:120px">
+			<select name="cate_id">
+				<option value="">试卷分类</option>
+				{volist name = ":get_base_data('paper_cate')" id="vo"}
+				<option value="{$vo.id}">{$vo.title}</option>
+				{/volist}
+			</select>
+		</div>
+		<div class="layui-input-inline" style="width:120px">
+			<select name="types">
+				<option value="">试卷类型</option>
+				<option value="1">常规考试</option>
+				<option value="2">课程考试</option>
+				<option value="3">培训考试</option>
+			</select>
+		</div>
+		<div class="layui-input-inline" style="width:300px">
+			<input type="text" name="keywords" placeholder="关键字" class="layui-input" autocomplete="off" />
+		</div>
+		<div class="layui-input-inline" style="width:150px">
+			<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="table-search"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+			<button type="reset" class="layui-btn layui-btn-reset" lay-filter="table-reset">清空</button>
+		</div>
+	</form>
+    <table class="layui-hide" id="test" lay-filter="test"></table>
+</div>
+<script type="text/html" id="toolbarDemo">
+  <div class="layui-btn-container">
+  	<button class="layui-btn layui-btn-sm addNew" type="button">+ 添加试卷</button>
+  </div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+	<script>
+	const moduleInit = ['tool','tablePlus'];
+	function gouguInit() {
+		var table = layui.tablePlus, tool = layui.tool, form = layui.form, dropdown = layui.dropdown;
+		layui.pageTable = table.render({
+			elem: '#test'
+			,toolbar: '#toolbarDemo'
+			,title:'试卷列表'
+			,url: "/exam/paper/datalist"
+			,page: true
+			,cellMinWidth: 80
+			,height: 'full-114'
+			,cols: [[
+				{field:'id',width:80, title: 'ID号', align:'center'}
+				,{field:'cate',width:120, title: '所属分类', align:'center'}
+				,{field:'title',title: '试卷名称',minWidth:200}
+				,{field:'types',width:80, title: '考试性质', align:'center',templet: function(d){
+					var html1='<span class="green">常规考试</span>';
+					var html2='<span class="blue">课程考试</span>';
+					var html3='<span class="red">培训考试</span>';
+					if(d.types==1){
+						return html1;
+					}
+					if(d.types==2){
+						return html2;
+					}
+					else{
+						return html3;
+					}
+				}}
+				,{field:'train',title: '关联课程/培训',minWidth:200}
+				,{field:'admin_name',width:100, title: '创建人', align:'center'}
+				,{field:'create_time',width:150, title: '创建时间', align:'center'}
+				,{field:'status', title: '状态',width:80,align:'center',templet: function(d){
+					var html1='<span class="green">已发布</span>';
+					var html2='<span class="yellow">未发布</span>';
+					if(d.status==1){
+						return html1;
+					}
+					else{
+						return html2;
+					}
+				}}
+				,{width:240,fixed:'right', title: '操作', align:'center',templet: function(d){
+					var html='';
+					var btn1='<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>';					
+					var btn2='<a class="layui-btn layui-btn-xs layui-btn-warm" lay-event="question">组卷</a>';					
+					var btn3='<a class="layui-btn layui-btn-xs layui-btn-warm" lay-event="view">组卷详情</a>';					
+					var btn4='<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="record">考试记录</a>';					
+					var btn5='<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="disable">下架</a>';
+					var btn6='<a class="layui-btn layui-btn-xs" lay-event="open">发布</a>';					
+					var btn7='<a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="preview">预览</a>';
+					if(d.status==1){
+						html = '<div class="layui-btn-group">'+btn1+btn3+btn4+btn5+btn7+'</div>';
+					}
+					else{
+						if(d.section==0){
+							html = '<div class="layui-btn-group">'+btn1+btn2+'</div>';
+						}
+						else{
+							html = '<div class="layui-btn-group">'+btn1+btn2+btn6+btn7+'</div>';
+						}
+					}
+					return html;
+				}}
+			]]
+		});
+		
+		table.on('tool(test)',function (obj) {
+			let that = this;
+			if(obj.event === 'edit'){					
+				tool.side("/exam/paper/add?id="+obj.data.id);
+			}
+			if(obj.event === 'question'){					
+				tool.side("/exam/paper/question?id="+obj.data.id);
+			}
+			if(obj.event === 'record'){					
+				tool.side("/exam/record/datalist?id="+obj.data.id);
+			}
+			if(obj.event === 'preview'){
+				tool.side("/exam/paper/preview/id/"+obj.data.id+".html");
+			}
+			if(obj.event === 'view'){
+				tool.side("/exam/paper/view?id="+obj.data.id);
+			}
+			if(obj.event === 'disable'){
+				layer.confirm('确定要下架该试卷吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layui.pageTable.reload();
+						}
+					}
+					tool.post("/exam/paper/check", { id: obj.data.id,status: 0}, callback);
+					layer.close(index);
+				});
+			}
+			if(obj.event === 'open'){
+				layer.confirm('确定要发布该试卷吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layui.pageTable.reload();
+						}
+					}
+					tool.post("/exam/paper/check", { id: obj.data.id,status: 1}, callback);
+					layer.close(index);
+				});
+			}
+		});
+		
+		$('body').on('click','.addNew',function(){
+			tool.side("/exam/paper/add");
+		});
+	}
+	</script>
+{/block}
+<!-- /脚本 -->

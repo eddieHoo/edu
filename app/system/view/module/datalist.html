@@ -1,0 +1,149 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">
+	<div class="gg-form-bar border-t border-x">
+		<div class="pb-3"><button type="button" class="layui-btn layui-btn-sm side-a" data-href="/system/module/add">新增自定义模块</button>{empty name="$oa_module"}<span class="ml-3 red">温馨提示：可能是网络或其他原因未能请求到官网的模块数据，但不影响系统的正常使用。</span>{/empty}</div>
+	</div>
+	<table cellspacing="0" cellpadding="0" border="0" class="layui-table layui-table-form">
+		<tr>
+			<th style="text-align: center; background-color:#FAFAFA" width="100">模块名称</th>
+			<th style="text-align: center; background-color:#FAFAFA" width="100">模块所在目录</th>
+			<th style="text-align: center; background-color:#FAFAFA" width="300">模块描述</th>
+			<th style="text-align: center; background-color:#FAFAFA" width="50">类型</th>
+			<th style="text-align: center; background-color:#FAFAFA" width="50">开发者</th>
+			<th style="text-align: center; background-color:#FAFAFA" width="50">状态</th>
+			<th style="text-align: center; background-color:#FAFAFA;" width="100">操作</th>
+		</tr>
+		{empty name="sys_module"}
+		<tr>
+			<td colspan="7" align="center">暂无数据</td>
+		</tr>
+		{/empty}
+		{volist name="sys_module" id="vo" key="k"}
+		<tr>
+			<td align="center">{$vo.title}</td>
+			<td>app/{$vo.name}</td>
+			<td>{$vo.desc}</td>
+			<td align="center">
+				{eq name="$vo.type" value="1"}<span class="red">系统模块</span>{/eq}
+				{eq name="$vo.type" value="2"}<span class="blue">普通模块</span>{/eq}
+				{eq name="$vo.type" value="3"}<span class="green">自定义模块</span>{/eq}
+			</td>
+			<td align="center">
+				{eq name="$vo.sourse" value="1"}勾股官方{/eq}
+				{eq name="$vo.sourse" value="2"}第三方{/eq}
+			</td>
+			{eq name="$vo.status" value="-1"}
+			<td align="center">
+				<span class="red">未安装</span>
+			</td>
+			<td align="center">
+				<div class="layui-btn-group">
+					{eq name = "$vo.is_file" value="0"}
+					<a class="layui-btn layui-btn-xs down" href="https://www.gougucms.com/system/pages/detail/s/gouguoa.html" target="_blank">下载</a>
+					{/eq}
+					{eq name = "$vo.is_file" value="1"}
+					<a class="layui-btn layui-btn-xs install" data-name="{$vo.name}">安装</a>
+					{/eq}
+					<a class="layui-btn layui-btn-normal layui-btn-xs view" href="https://www.gougucms.com/system/pages/detail/s/gouguoa.html" target="_blank">演示</a>
+				</div>
+			</td>
+			{/eq}
+			{eq name="$vo.status" value="0"}
+			<td align="center">
+				<span class="yellow">已卸载</span>
+			</td>
+			<td align="center">
+				<div class="layui-btn-group">
+					{eq name="$vo.sourse" value="2"}<a class="layui-btn layui-btn-xs side-a" data-href="/system/module/add/id/{$vo.id}">编辑</a>{/eq}
+					<a class="layui-btn layui-btn-xs add" data-name="{$vo.name}" data-type="{$vo.type}">恢复</a>
+				</div>
+			</td>
+			{/eq}
+			{eq name="$vo.status" value="1"}
+			<td align="center">
+				<span class="green">正常</span>
+			</td>
+			<td align="center">
+				{eq name="$vo.type" value="3"}
+				<div class="layui-btn-group">
+					<a class="layui-btn layui-btn-xs side-a" data-href="/system/module/add/id/{$vo.id}">编辑</a>
+					<a class="layui-btn layui-bg-blue layui-btn-xs side-a" data-href="/system/module/auth/id/{$vo.id}">数据权限配置</a>
+					<a class="layui-btn layui-btn-danger layui-btn-xs delete" data-name="{$vo.name}" data-id="{$vo.id}" data-type="{$vo.type}">删除</a>
+				</div>
+				{else/}
+				<a class="layui-btn layui-bg-blue layui-btn-xs side-a" data-href="/system/module/auth/id/{$vo.id}">数据权限配置</a>
+				{/eq}
+			</td>
+			{/eq}
+		</tr>
+		{/volist}
+	</table>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	const moduleInit = ['tool'];
+	function gouguInit() {
+		var tool = layui.tool;
+
+		$('body').on('click', '.install', function () {
+			let name = $(this).data('name');
+			tool.ask('确定要安装该模块吗?', function (index) {
+				//layer.msg('该功能内测中...');
+				//return false;
+				let callback = function (e) {
+					layer.msg(e.msg);
+					if (e.code == 0) {
+						location.reload();
+					}
+				}
+				tool.post("/system/module/install", {name: name}, callback);
+			});
+		});
+		
+		$('body').on('click', '.delete', function () {
+			let id = $(this).data('id');
+			let name = $(this).data('name');
+			let type = $(this).data('type');
+			if(type==1){
+				layer.msg('系统模块，不支持删除');
+				return false;
+			}
+			tool.ask('确定要删除该模块吗?', function (index) {
+				let callback = function (e) {
+					layer.msg(e.msg);
+					if (e.code == 0) {
+						setTimeout(function(){
+							parent.location.reload();
+						},1000)
+					}
+				}
+				tool.post("/system/module/del",{id: id}, callback);
+			});
+		});
+		
+		$('body').on('click', '.add', function () {
+			let name = $(this).data('name');
+			let type = $(this).data('type');
+			tool.ask('确定要恢复使用该模块吗?', function (index) {
+				let callback = function (e) {
+					layer.msg(e.msg);
+					if (e.code == 0) {
+						setTimeout(function(){
+							parent.location.reload();
+						},1000)				
+					}
+				}
+				tool.post("/system/module/recovery",{name: name}, callback);
+			});
+		});
+
+	}
+</script>
+{/block}
+<!-- /脚本 -->

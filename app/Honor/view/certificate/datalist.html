@@ -1,0 +1,127 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">
+	<form class="layui-form gg-form-bar border-x border-t">
+		<div class="layui-input-inline" style="width:300px;">
+			<input type="text" name="keywords" placeholder="关键字" class="layui-input" autocomplete="off" />
+		</div>
+		<div class="layui-input-inline" style="width:150px">
+			<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="table-search"><i class="layui-icon layui-icon-search mr-1"></i>搜索</button>
+			<button type="reset" class="layui-btn layui-btn-reset" lay-filter="table-reset">清空</button>
+		</div>
+	</form>
+    <table class="layui-hide" id="test" lay-filter="test"></table>
+</div>
+<script type="text/html" id="toolbarDemo">
+  <div class="layui-btn-container">
+	<button class="layui-btn layui-btn-sm" lay-event="add">
+		<span>+ 添加证书模板</span>
+		<i class="layui-icon layui-icon-down layui-font-12"></i>
+	</button>
+  </div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+	<script>
+	const type_array={:json_encode(get_certificate_types(1),JSON_UNESCAPED_UNICODE)};
+	const moduleInit = ['tool','tablePlus'];
+	function gouguInit() {
+		var table = layui.tablePlus, tool = layui.tool, form = layui.form, dropdown = layui.dropdown;
+		layui.pageTable = table.render({
+			elem: '#test'
+			,toolbar: '#toolbarDemo'
+			,title:'证书模板列表'
+			,url: "/honor/certificate/datalist"
+			,page: true
+			,cellMinWidth: 80
+			,height: 'full-114'
+			,cols: [[
+				{field:'id',width:80, title: 'ID号', align:'center'}
+				,{field:'title',title: '证书模板名称'}
+				,{field:'name',width:200,title: '证书标题'}
+				,{field:'typestr',width:120, title: '证书类型', align:'center'}
+				,{field:'create_time',width:150,align:'center', title: '创建时间', align:'center'}
+				,{field:'status', title: '状态',width:80,align:'center',templet: function(d){
+					var html1='<span class="green">正常</span>';
+					var html2='<span class="yellow">下架</span>';
+					if(d.status==1){
+						return html1;
+					}
+					else{
+						return html2;
+					}
+				}}
+				,{width:132,fixed:'right', title: '操作', align:'center',templet: function(d){
+					var html='';
+					var btn='<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a><a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="users">授予</a>';
+					var btn1='<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="disable">禁用</a>';
+					var btn2='<a class="layui-btn layui-btn-xs" lay-event="open">启用</a>';
+					if(d.status==1){
+						html = '<div class="layui-btn-group">'+btn+btn1+'</div>';
+					}
+					else{
+						html = '<div class="layui-btn-group">'+btn+btn2+'</div>';
+					}
+					return html;
+				}}
+			]]
+		});
+		
+		table.on('tool(test)',function (obj) {
+			if(obj.event === 'edit'){					
+				tool.side("/honor/certificate/add?id="+obj.data.id);
+			}
+			if(obj.event === 'users'){					
+				tool.side("/honor/certificate/users?id="+obj.data.id);
+			}
+			if(obj.event === 'disable'){
+				layer.confirm('确定要下架该证书模板吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layui.pageTable.reload();
+						}
+					}
+					tool.post("/honor/certificate/check", { id: obj.data.id,status: 0,title: obj.data.title}, callback);
+					layer.close(index);
+				});
+			}
+			if(obj.event === 'open'){
+				layer.confirm('确定要上架该证书模板吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layui.pageTable.reload();
+						}
+					}
+					tool.post("/honor/certificate/check", { id: obj.data.id,status: 1,title: obj.data.title}, callback);
+					layer.close(index);
+				});
+			}
+		});
+		
+		//表头工具栏事件
+		table.on('toolbar(test)', function(obj){
+			var checkStatus = table.checkStatus(obj.config.id); //获取选中行状态
+			var data = checkStatus.data;
+			var that = this;
+			if (obj.event === 'add'){
+				  dropdown.render({
+					elem: that,
+					show: true, // 外部事件触发即显示
+					data: type_array,
+					click: function(obj){
+						tool.side("/honor/certificate/add?type="+obj.id);
+					}
+				  });
+				return;
+			}
+		});
+	}
+	</script>
+{/block}
+<!-- /脚本 -->

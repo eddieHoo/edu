@@ -1,0 +1,157 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="body"}
+<form class="layui-form p-page">
+	<h3 class="pb-2">线下培训详情</h3>
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray">培训名称</td>
+			<td>{$detail.title|default=''}</td>
+			<td class="layui-td-gray">培训状态</td>
+			<td>
+				{eq name="$detail.status" value="1"}<span class="red">未发布</span>{/eq}
+				{eq name="$detail.status" value="2"}<span class="green">已发布</span>{/eq}
+				{eq name="$detail.status" value="3"}<span class="blue">培训中</span>{/eq}
+				{eq name="$detail.status" value="4"}<span class="yellow">已培训</span>{/eq}
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">培训目标</td>
+			<td colspan="3"><pre style="font-family:inherit">{$detail.desc|default=''}</pre></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">培训周期</td>
+			<td>{$detail.start_time_str|default=''} 至 {$detail.end_time_str|default=''} （{$detail.tips_time|default='-'}）
+			</td>
+			<td class="layui-td-gray-2">培训总时长</td>
+			<td>{$detail.duration|default=''}</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">培训对象</td>
+			<td>
+				{eq name="$detail.types" value="0"}全部{/eq}
+				{eq name="$detail.types" value="1"}部门{/eq}
+				{eq name="$detail.types" value="2"}岗位{/eq}
+				{eq name="$detail.types" value="3"}员工{/eq}
+			</td>
+			<td class="layui-td-gray">培训类型</td>
+			<td>{$detail.cate}</td>
+		</tr>
+		{eq name="$detail.types" value="1"}
+		<tr>
+			<td class="layui-td-gray-2">参与培训部门</td>
+			<td colspan="3">{$detail.departments|default=''}</td>
+		</tr>
+		{/eq}
+		{eq name="$detail.types" value="2"}
+		<tr>
+			<td class="layui-td-gray-2">参与培训岗位</td>
+			<td colspan="3">{$detail.positions|default=''}</td>
+		</tr>
+		{/eq}
+		{eq name="$detail.types" value="3"}
+		<tr>
+			<td class="layui-td-gray-2">参与培训人员</td>
+			<td colspan="3">{$detail.unames|default=''}</td>
+		</tr>
+		{/eq}
+		<tr>
+			<td colspan="4"><strong>培训计划 / 执行表</strong></td>
+		</tr>
+		<tr>
+			<td colspan="4">				
+				<table id="planTable" class="layui-table layui-table-min" style="margin:0">
+					<tr>
+						<th width="200">培训阶段名称</th>
+						<th width="100">培训具体时间</th>
+						<th width="300">培训内容</th>
+						<th width="60">培训师</th>
+						<th width="100">执行方式</th>
+						<th width="150">培训成果</th>
+					</tr>
+					{notempty name="$detail.content_plan"}
+					{volist name="$detail.content_plan" id="vo"}
+					<tr>
+						<td style="text-align:left;">{$vo.plan_title|default='-'}</td>
+						<td>{$vo.plan_time|default='-'}</td>
+						<td style="text-align:left;">{$vo.plan_content|default='-'}</td>
+						<td>{$vo.plan_lecturer|default='-'}</td>
+						<td>{$vo.plan_types|default='-'}</td>
+						<td style="text-align:left;">{$vo.plan_result|default='-'}</td>
+					</tr>
+					{/volist}
+					{else/}
+					<tr class="plan-tr">
+						<td colspan="6" style="padding:20px; text-align:center; color:#999">暂无培训计划及执行表</td>
+					</tr>
+					{/notempty}
+				</table>
+			</td>
+		</tr>
+		{notempty name="$detail.file_ids"}
+		<tr>
+			<td colspan="4"><strong>培训资料 / 课件</strong></td>
+		</tr>
+		<tr>
+			<td colspan="4">
+				<div class="layui-row" id="uploadBox">
+					<input type="hidden" data-type="file" name="file_ids" value="{$detail.file_ids}">
+					{volist name="$detail.file_array" id="vo"}
+					<div class="layui-col-md4" id="uploadFile{$vo.id}">{:file_card($vo)}</div>
+					{/volist}
+				</div>
+			</td>
+		</tr>
+		{/notempty}
+		<tr>
+			<td colspan="4"><strong>培训考试</strong></td>
+		</tr>
+		<tr>
+			<td colspan="4">				
+				<table id="planTable" class="layui-table layui-table-min" style="margin:0">
+					<tr>
+						<th width="300">试卷名称</th>
+						<th width="200">开放考试周期</th>
+						<th width="80">考试时长</th>
+						<th width="60">总分</th>
+						<th width="60">优秀分数线</th>
+						<th width="60">及格分数线</th>
+						<th width="100">创建时间</th>
+					</tr>
+					{notempty name="$detail.paper"}
+					{volist name="$detail.paper" id="vo"}
+					<tr>
+						<td style="text-align:left;">{$vo.title|default='-'}</td>
+						<td>{$vo.start_time|date='Y-m-d H:i'} 至 {$vo.end_time|date='Y-m-d H:i'}</td>
+						<td>{:getTimeBySec($vo.duration,false)}</td>
+						<td>{$vo.total_score}</td>
+						<td>{$vo.good_score}</td>
+						<td>{$vo.pass_score}</td>
+						<td>{$vo.create_time|date='Y-m-d H:i'}</td>
+					</tr>
+					{/volist}
+					{else/}
+					<tr class="plan-tr">
+						<td colspan="7" style="padding:20px; text-align:center; color:#999">暂无培训考试</td>
+					</tr>
+					{/notempty}
+				</table>
+			</td>
+		</tr>
+	</table>
+</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	var moduleInit = ['tool'];
+
+	function gouguInit() {
+		var form = layui.form, tool = layui.tool;
+
+	}
+</script>
+{/block}
+<!-- /脚本 -->

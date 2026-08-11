@@ -1,0 +1,74 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">	
+    <table class="layui-hide" id="test" lay-filter="test"></table>
+</div>
+<script type="text/html" id="toolbarDemo">
+	<h3>培训评价</h3>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+	<script>
+	const moduleInit = ['tool','tablePlus'];
+	const train_id = {$detail.id};
+	function gouguInit() {
+		var table = layui.tablePlus, tool = layui.tool, form = layui.form;
+		layui.pageTable = table.render({
+			elem: '#test'
+			,toolbar: '#toolbarDemo'
+			,title:'评价记录列表'
+			,url: "/train/train/appraise"
+			,where:{id:train_id}
+			,page: true
+			,cellMinWidth: 80
+			,cols: [[
+				{field:'uid',width:80, title: '学员ID', align:'center'}
+				,{field:'name',width:80,align:'center',title: '学员姓名'}
+				,{field:'department',width:120, title: '学员所在部门'}
+				,{field:'position',width:100,align:'center',title: '学员职称'}
+				,{field:'appraise_user_score',width:130,align:'center', title: '培训师对学员评分',templet: function(d){
+					if(d.appraise_user_score==0){
+						return '-';
+					}
+					else{
+						return d.appraise_user_score;
+					}
+				}}
+				,{field:'appraise_user',minWidth:240,title: '培训师对学员评价'}
+				,{field:'appraise_admin_score',width:120,align:'center',title: '学员对培训评分',templet: function(d){
+					if(d.appraise_admin_score==0){
+						return '-';
+					}
+					else{
+						return d.appraise_admin_score;
+					}
+				}}
+				,{field:'appraise_admin',minWidth:240,title: '学员对培训评价'}
+				,{width:80,fixed:'right', title: '操作', align:'center',ignoreExport:true,templet: function(d){
+					if(d.appraise_user_score==0){
+						return '<a class="layui-btn layui-btn-xs" lay-event="edit">去评价</a>';	
+					}
+					else{
+						return '<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="view">详情</a>';	
+					}								
+				}}
+			]]
+		});
+		
+		table.on('tool(test)',function (obj) {
+			if(obj.event === 'edit'){		
+				tool.side("/train/train/appraise_add?train_id="+train_id+'&uid='+obj.data.uid);
+			}
+			if(obj.event === 'view'){		
+				tool.side("/train/train/appraise_view?train_id="+train_id+'&uid='+obj.data.uid);
+			}
+			return false;
+		})
+	}
+	</script>
+{/block}
+<!-- /脚本 -->

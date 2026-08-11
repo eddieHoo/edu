@@ -1,0 +1,244 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+.layui-form-pane{}
+.layui-form-pane .layui-form-label{border-right:none;}
+.plan-tips{color:#999;}
+.types-0 .plan-days,.types-0 .plan-day,.types-0 .plan-week,.types-0 .plan-sec{display:none;}
+.types-1 .plan-day,.types-1 .plan-week,.types-1 .plan-sec{display:none;}
+.types-2 .plan-days,.types-2 .plan-day,.types-2 .plan-sec{display:none;}
+.types-3 .plan-days,.types-3 .plan-week,.types-3 .plan-sec{display:none;}
+.types-4 .plan-days,.types-4 .plan-week,.types-4 .plan-day,.types-4 .plan-sec{display:none;}
+.types-5 .plan-days,.types-5 .plan-week,.types-5 .plan-day,.types-5 .plan-hour,.types-5 .plan-sec{display:none;}
+.types-6 .plan-days,.types-6 .plan-week,.types-6 .plan-day,.types-6 .plan-hour,.types-6 .plan-min{display:none;}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<form class="layui-form p-page" lay-filter="pageform">
+	<h3 class="pb-2">定时任务</h3>
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td colspan="4"><strong class="red">注意：定时任务目前只是记录，具体需要技术人员自行在系统服务器添加定时任务计划。</strong></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">定时任务名称<font>*</font></td>
+			<td><input type="text" name="title" lay-verify="required" autocomplete="off" placeholder="请输入任务名称" lay-reqText="请输入任务名称" class="layui-input" value="{$detail.title|default=''}"></td>
+			<td class="layui-td-gray">任务标识<font>*</font></td>
+			<td><input type="text" name="name" lay-verify="required" autocomplete="off" placeholder="请输入任务任务标识，唯一" lay-reqText="请输入任务任务标识" class="layui-input" value="{$detail.name|default=''}"></td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray-3">执行请求计划周期</td>
+			{eq name="$id" value="0"}
+			<td colspan="3" class="layui-form-pane types-0">
+				<div class="layui-input-inline" style="width:90px;">
+					<select name="plan_types" lay-filter="types">
+						{volist name=":get_plan_types()" id="vo"}
+							<option value="{$key}">{$vo}</option>
+						{/volist}
+					</select>
+				</div>
+				<div class="layui-input-inline plan-days" style="width:111px;">
+					<div class="layui-form-item" style="margin:0">
+						<label class="layui-form-label" style="width:50px">N天</label>
+						<div class="layui-input-inline" style="width:60px;margin:0"><input type="number" name="plan_days" placeholder="" readonly value="1" class="layui-input" min="1" step="1" lay-affix="number"></div>
+					</div>
+				</div>
+				<div class="layui-input-inline plan-day" style="width:92px">
+					<div class="layui-form-item" style="margin:0">
+						<label class="layui-form-label" style="width:32px">日</label>
+						<div class="layui-input-inline" style="width:60px;margin:0"><input type="number" name="plan_day" placeholder="" readonly value="1" class="layui-input" min="1" max="31" step="1" lay-affix="number"></div>
+					</div>
+				</div>
+				<div class="layui-input-inline plan-week" style="width:80px">
+					<select name="plan_week">
+						<option value="1" selected>周一</option>
+						<option value="2">周二</option>
+						<option value="3">周三</option>
+						<option value="4">周四</option>
+						<option value="5">周五</option>
+						<option value="6">周六</option>
+						<option value="7">周日</option>
+					 </select>
+				</div>
+				<div class="layui-input-inline plan-hour" style="width:110px">
+					<div class="layui-form-item" style="margin:0">
+						<label class="layui-form-label" style="width:50px">小时</label>
+						<div class="layui-input-inline" style="width:60px;margin:0"><input type="number" name="plan_hour" placeholder="" readonly value="1" class="layui-input" min="1" max="24" step="1" lay-affix="number"></div>
+					</div>
+				</div>
+				<div class="layui-input-inline plan-min" style="width:110px">
+					<div class="layui-form-item" style="margin:0">
+						<label class="layui-form-label" style="width:50px">分钟</label>
+						<div class="layui-input-inline" style="width:60px;margin:0"><input type="number" name="plan_min" placeholder="" readonly value="30" class="layui-input" min="1" max="60" step="1" lay-affix="number"></div>
+					</div>
+				</div>
+				<div class="layui-input-inline plan-sec" style="width:110px">
+					<div class="layui-form-item" style="margin:0">
+						<label class="layui-form-label" style="width:50px">秒</label>
+						<div class="layui-input-inline" style="width:60px;margin:0"><input type="number" name="plan_sec" placeholder="" readonly value="30" class="layui-input" min="20" max="60" step="1" lay-affix="number"></div>
+					</div>
+				</div>
+				<div class="layui-input-inline plan-tips">每天的 01:30 执行一次</div>
+			</td>
+			{else/}
+			<td colspan="3" class="layui-form-pane types-{$detail.plan_types}">
+				<div class="layui-input-inline" style="width:90px;">
+					<select name="plan_types" lay-filter="types">
+						{volist name=":get_plan_types()" id="vo"}
+							<option value="{$key}" {eq name="$detail.plan_types" value="$key"} selected{/eq}>{$vo}</option>
+						{/volist}
+					</select>
+				</div>
+				<div class="layui-input-inline plan-days" style="width:111px;">
+					<div class="layui-form-item" style="margin:0">
+						<label class="layui-form-label" style="width:50px">N天</label>
+						<div class="layui-input-inline" style="width:60px;margin:0"><input type="number" name="plan_days" placeholder="" readonly value="{$detail.plan_days|default=1}" class="layui-input" min="1" step="1" lay-affix="number"></div>
+					</div>
+				</div>
+				<div class="layui-input-inline plan-day" style="width:92px">
+					<div class="layui-form-item" style="margin:0">
+						<label class="layui-form-label" style="width:32px">日</label>
+						<div class="layui-input-inline" style="width:60px;margin:0"><input type="number" name="plan_day" placeholder="" readonly value="{$detail.plan_day|default=1}" class="layui-input" min="1" max="31" step="1" lay-affix="number"></div>
+					</div>
+				</div>
+
+				<div class="layui-input-inline plan-week" style="width:80px">
+					<select name="plan_week">
+						<option value="1" {eq name="$detail.plan_week" value="1"} selected{/eq}>周一</option>
+						<option value="2" {eq name="$detail.plan_week" value="2"} selected{/eq}>周二</option>
+						<option value="3" {eq name="$detail.plan_week" value="3"} selected{/eq}>周三</option>
+						<option value="4" {eq name="$detail.plan_week" value="4"} selected{/eq}>周四</option>
+						<option value="5" {eq name="$detail.plan_week" value="5"} selected{/eq}>周五</option>
+						<option value="6" {eq name="$detail.plan_week" value="6"} selected{/eq}>周六</option>
+						<option value="7" {eq name="$detail.plan_week" value="7"} selected{/eq}>周7日</option>
+					 </select>
+				</div>
+				<div class="layui-input-inline plan-hour" style="width:110px">
+					<div class="layui-form-item" style="margin:0">
+						<label class="layui-form-label" style="width:50px">小时</label>
+						<div class="layui-input-inline" style="width:60px;margin:0"><input type="number" name="plan_hour" placeholder="" readonly value="{$detail.plan_hour|default=1}" class="layui-input" min="1" max="24" step="1" lay-affix="number"></div>
+					</div>
+				</div>
+				<div class="layui-input-inline plan-min" style="width:110px">
+					<div class="layui-form-item" style="margin:0">
+						<label class="layui-form-label" style="width:50px">分钟</label>
+						<div class="layui-input-inline" style="width:60px;margin:0"><input type="number" name="plan_min" placeholder="" readonly value="{$detail.plan_min|default=30}" class="layui-input" min="1" max="60" step="1" lay-affix="number"></div>
+					</div>
+				</div>
+				<div class="layui-input-inline plan-sec" style="width:110px">
+					<div class="layui-form-item" style="margin:0">
+						<label class="layui-form-label" style="width:50px">秒</label>
+						<div class="layui-input-inline" style="width:60px;margin:0"><input type="number" name="plan_sec" placeholder="" readonly value="{$detail.plan_sec|default=30}" class="layui-input" min="20" max="60" step="20" lay-affix="number"></div>
+					</div>
+				</div>
+				<div class="layui-input-inline plan-tips">
+				{eq name="$detail.plan_types" value="0"}
+					每天的 {:sprintf("%02d", $detail.plan_hour)}:{:sprintf("%02d", $detail.plan_min)} 执行一次
+				{/eq}
+				
+				{eq name="$detail.plan_types" value="1"}
+					每隔 {$detail.plan_days} 天的 {:sprintf("%02d", $detail.plan_hour)}:{:sprintf("%02d", $detail.plan_min)} 执行一次
+				{/eq}
+
+				{eq name="$detail.plan_types" value="2"}
+					每周的 {$detail.plan_week} 的 {:sprintf("%02d", $detail.plan_hour)}:{:sprintf("%02d", $detail.plan_min)} 执行一次
+				{/eq}
+				
+				{eq name="$detail.plan_types" value="3"}
+					每月的 {$detail.plan_day} 号的 {:sprintf("%02d", $detail.plan_hour)}:{:sprintf("%02d", $detail.plan_min)} 执行一次
+				{/eq}
+
+				{eq name="$detail.plan_types" value="4"}
+					每天0点开始，每隔 {$detail.plan_hour}小时的第 {$detail.plan_min} 分钟执行一次
+				{/eq}
+				{eq name="$detail.plan_types" value="5"}
+					每天0点开始，每隔 {$detail.plan_min} 分钟执行一次
+				{/eq}
+				{eq name="$detail.plan_types" value="6"}
+					每天0点开始，每隔 {$detail.plan_sec} 秒执行一次
+				{/eq}
+				</div>
+			</td>
+			{/eq}
+		</tr>
+		<tr>
+			<td class="layui-td-gray-2">任务访问链接<font>*</font></td>
+			<td colspan="3">
+				<input type="text" name="link" lay-verify="required" autocomplete="off" placeholder="请输入任务访问链接" lay-reqText="请输入任务访问链接" class="layui-input" value="{$detail.link|default=''}">
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">任务描述</td>
+			<td colspan="3">
+				<textarea name="desc" placeholder="请输入任务描述，不能超过200个字" class="layui-textarea">{$detail.desc|default=''}</textarea>
+			</td>
+		</tr>
+	</table>
+	<div class="pt-4">
+		<input type="hidden" name="id" value="{$detail.id|default=0}" />
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+	</div>
+</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	function formatTwoDigits(number) {
+	  return number < 10 ? '0' + number : number;
+	}
+	const moduleInit = ['tool'];
+	function gouguInit() {
+		var form = layui.form, tool = layui.tool;
+		form.on('select(types)', function(data){
+			let val = data.value;
+			$('.layui-form-pane').attr('class','layui-form-pane types-'+val);
+			get_tips();
+			return false;
+		});
+		
+		function get_tips(){
+			let  webform = form.val('pageform'),tips='';
+			if(webform.plan_types==0){
+				tips = '每天的 '+formatTwoDigits(webform.plan_hour)+':'+formatTwoDigits(webform.plan_min)+' 执行一次';
+			}
+			if(webform.plan_types==1){
+				tips = '每隔'+webform.plan_days+'天的 '+formatTwoDigits(webform.plan_hour)+':'+formatTwoDigits(webform.plan_min)+' 执行一次';
+			}
+			if(webform.plan_types==2){
+				tips = '每周的'+webform.plan_week+'的 '+formatTwoDigits(webform.plan_hour)+':'+formatTwoDigits(webform.plan_min)+' 执行一次';
+			}
+			if(webform.plan_types==3){
+				tips = '每月的'+webform.plan_day+'号的 '+formatTwoDigits(webform.plan_hour)+':'+formatTwoDigits(webform.plan_min)+' 执行一次';
+			}
+			if(webform.plan_types==4){
+				tips = '每天0点开始，每隔 '+webform.plan_hour+' 小时的第 '+webform.plan_min+' 分钟执行一次';
+			}
+			if(webform.plan_types==5){
+				tips = '每天0点开始，每隔 '+webform.plan_min+' 分钟执行一次';
+			}
+			if(webform.plan_types==6){
+				tips = '每天0点开始，每隔 '+webform.plan_sec+' 秒执行一次';
+			}
+			$('.plan-tips').html(tips);
+		}
+		
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.sideClose(1000);
+				}
+			}
+			let clickbtn = $(this);
+			tool.post("/system/task/add", data.field, callback,clickbtn);
+			return false;
+		});
+	}
+</script>
+{/block}
+<!-- /脚本 -->

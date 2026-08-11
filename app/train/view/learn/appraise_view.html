@@ -1,0 +1,61 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">
+	<h3 class="pb-2">{$detail.title|default=''}</h3>
+	<div class="layui-card">
+		<div class="layui-card-header blue" style="height:45px; line-height:45px;"><strong>培训师对我的评价</strong></div>
+		<div class="layui-card-body">
+			{notempty name="$appraise.appraise_user_score"}
+			<p>评 价 分：<div id="user_score" lay-options="{value: {$appraise.appraise_user_score|default=6}}"></div></p>
+			<p>评价内容：</p>
+			<pre style="font-family:inherit">{$appraise.appraise_user|default='-'}</pre>
+			{else/}
+			<div style="color:#999; text-align:center;padding:12px 0">暂无评价内容</div>
+			{/notempty}
+		</div>
+	</div>
+	
+	<div class="layui-card">
+		<div class="layui-card-header green" style="height:45px; line-height:45px;"><strong>我对培训师的评价</strong></div>
+		<div class="layui-card-body">
+			{notempty name="$appraise.appraise_admin_score"}
+			<p>评 价 分：<div id="admin_score" lay-options="{value: {$appraise.appraise_admin_score|default=6}}"></div></p>
+			<p>评价内容：</p>
+			<pre style="font-family:inherit">{$appraise.appraise_admin|default='-'}</pre>
+			<div style="padding:10px 0;"><span data-href="/train/learn/appraise_add?train_id={$detail.id}" class="layui-btn layui-btn-sm side-a">去修改</span></div>
+			{else/}
+			<div style="color:#999; text-align:center;padding:12px 0">暂无评价内容 <span data-href="/train/learn/appraise_add?train_id={$detail.id}" class="layui-btn layui-btn-sm side-a">去评价</span></div>
+			{/notempty}
+		</div>
+	</div>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	var moduleInit = ['tool'];
+
+	function gouguInit() {
+		var form = layui.form, tool = layui.tool,rate = layui.rate;
+		
+		 // 渲染
+		  rate.render({
+			elem: '#admin_score',
+			length: 10,
+			readonly:true,
+			text: true
+		  });
+		  rate.render({
+			elem: '#user_score',
+			length: 10,
+			readonly:true,
+			text: true
+		  });
+
+	}
+</script>
+{/block}
+<!-- /脚本 -->

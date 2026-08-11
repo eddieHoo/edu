@@ -1,0 +1,172 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+.layui-table-0 .tr-1,.layui-table-0 .tr-2,.layui-table-0 .tr-3{display:none;}
+.layui-table-1 .tr-2,.layui-table-1 .tr-3{display:none;}
+.layui-table-2 .tr-1,.layui-table-2 .tr-3{display:none;}
+.layui-table-3 .tr-1,.layui-table-3 .tr-2{display:none;}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<form class="layui-form p-page">
+	{eq name="$id" value="0"}
+	<h3 class="pb-2">新增公告</h3>
+	{else/}
+	<h3 class="pb-2">编辑公告</h3>
+	{/eq}
+	<table class="layui-table layui-table-form layui-table-{$detail.role_type|default=0}" id="pageTable">
+		<tr>
+			<td class="layui-td-gray">公告标题<font>*</font></td>
+			<td><input type="text" name="title" lay-verify="required" lay-reqText="请输入公告标题" placeholder="请输入公告标题" class="layui-input" value="{$detail.title|default=''}"></td>
+			<td class="layui-td-gray">公告分类<font>*</font></td>
+			<td>
+				<select name="cate_id" lay-verify="required" lay-reqText="请选择分类">
+					<option value="">请选择分类</option>
+					{if condition="$id eq 0"}
+						{volist name=":get_base_data('note_cate')" id="v"}
+						<option value="{$v.id}">{$v.title}</option>
+						{/volist}
+					{else/}
+						{volist name=":get_base_data('note_cate')" id="v"}
+						<option value="{$v.id}" {eq name="$detail.cate_id" value="$v.id" }selected{/eq}>{$v.title}</option>
+						{/volist}
+					{/if}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray-2">可查看人类型<font>*</font></td>
+			<td>
+				{if condition="$id eq 0"}
+				<input type="radio" name="role_type" lay-filter="types" value="0" title="全部" checked>
+				<input type="radio" name="role_type" lay-filter="types" value="1" title="部门">
+				<input type="radio" name="role_type" lay-filter="types" value="2" title="岗位">
+				<input type="radio" name="role_type" lay-filter="types" value="3" title="员工">
+				{else/}
+				<input type="radio" name="role_type" lay-filter="types" value="0" title="全部" {eq name="$detail.role_type" value="0"}checked{/eq}>
+				<input type="radio" name="role_type" lay-filter="types" value="1" title="部门" {eq name="$detail.role_type" value="1"}checked{/eq}>
+				<input type="radio" name="role_type" lay-filter="types" value="2" title="岗位" {eq name="$detail.role_type" value="2"}checked{/eq}>
+				<input type="radio" name="role_type" lay-filter="types" value="3" title="员工" {eq name="$detail.role_type" value="3"}checked{/eq}>
+				{/if}
+			</td>
+			<td class="layui-td-gray">排序</td>
+			<td><input type="text" name="sort" placeholder="请输入排序，数字" class="layui-input" value="{$detail.sort|default=0}"></td>
+		</tr>
+		<tr class="tr-1">
+			<td class="layui-td-gray">可查看部门<font>*</font></td>
+			<td colspan="3">
+				<input type="text" name="role_departments" value="{$detail.role_departments|default=''}" placeholder="请选择可查看部门" readonly class="layui-input picker-oa" data-types="department" data-type="2">
+				<input type="hidden" name="role_dids" value="{$detail.role_dids|default=''}">
+			</td>
+		</tr>
+		<tr class="tr-2">
+			<td class="layui-td-gray">可查看岗位<font>*</font></td>
+			<td colspan="3">
+				<input type="text" name="role_positions" value="{$detail.role_positions|default=''}" placeholder="请选择可查看岗位" readonly class="layui-input picker-oa" data-types="position" data-type="2"">
+				<input type="hidden" name="role_pids" value="{$detail.role_pids|default=''}">
+			</td>
+		</tr>
+		<tr class="tr-3">
+			<td class="layui-td-gray">可查看人员<font>*</font></td>
+			<td colspan="3">
+				<input type="text" name="role_unames" value="{$detail.role_unames|default=''}" placeholder="请选择可查看人员" readonly class="layui-input picker-admin" data-type="2">
+				<input type="hidden" name="role_uids" value="{$detail.role_uids|default=''}">
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">关联链接</td>
+			<td><input type="text" name="src" placeholder="请输入链接" class="layui-input" value="{$detail.src|default=''}"></td>		
+			<td class="layui-td-gray">状态<font>*</font></td>
+			<td>
+				{if condition="$id eq 0"}
+				<input type="radio" name="status" value="1" title="正常" checked>
+				<input type="radio" name="status" value="0" title="禁用">
+				{else/}
+				<input type="radio" name="status" value="1" title="正常" {eq name="$detail.status" value="1" }checked{/eq}>
+				<input type="radio" name="status" value="0" title="禁用" {eq name="$detail.status" value="0" }checked{/eq}>
+				{/if}
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray-2">
+				<div class="layui-input-inline">相关附件</div>
+				<div class="layui-input-inline">
+					<button type="button" class="layui-btn layui-btn-xs" id="uploadBtn"><i class="layui-icon"></i></button>
+				</div>
+			</td>
+			<td colspan="3">
+				<div class="layui-row" id="uploadBox">
+					<input type="hidden" data-type="file" name="file_ids" value="{$detail.file_ids|default=''}">
+					{notempty name="$detail.file_ids"}
+					{volist name="$detail.file_array" id="vo"}
+						<div class="layui-col-md4" id="uploadFile{$vo.id}">{:file_card($vo)}</div>
+					{/volist}
+					{/notempty}
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray" style="vertical-align:top;">公告内容<font>*</font></td>
+			<td colspan="3">
+				<textarea name="content" placeholder="请输入内容" class="layui-textarea" id="container" style="border:0;padding:0">{$detail.content|default=''}</textarea>
+			</td>
+		</tr>
+	</table>
+
+	<div class="pt-4">
+		<input type="hidden" name="id" value="{$id}" />
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+	</div>
+</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	const moduleInit = ['tool','oaPicker','uploadPlus','tinymce'];
+	function gouguInit() {
+		var form = layui.form,tool=layui.tool,laydate = layui.laydate,uploadPlus = layui.uploadPlus;
+		//选择查看人类型
+		form.on('radio(types)', function (data) {
+			$('#pageTable').attr('class','layui-table layui-table-form layui-table-'+data.value);
+		});
+		
+		//日期范围
+		laydate.render({
+			elem: '#date',
+			range: ['#start_time', '#end_time']
+		});
+		//相关附件上传
+		var attachment = new uploadPlus();
+		//编辑器初始化
+		var editor = layui.tinymce;
+		var edit = editor.render({
+			selector: "#container",
+			images_upload_url: '/api/index/upload/sourse/tinymce',//图片上传接口
+			height: 500
+		});
+		
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			data.field.content = tinyMCE.editors['container'].getContent();
+			if (data.field.content == '') {
+				layer.msg('请先完善公告内容');
+				return false;
+			}
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.sideClose(1000);
+				}
+			}
+			let clickbtn = $(this);
+			tool.post("/adm/note/add", data.field, callback,clickbtn);
+			return false;
+		});
+}
+</script>
+{/block}
+<!-- /脚本 -->

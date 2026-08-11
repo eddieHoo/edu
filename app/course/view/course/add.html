@@ -1,0 +1,190 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<style>
+.layui-table-0 .tr-1,.layui-table-0 .tr-2,.layui-table-0 .tr-3{display:none;}
+.layui-table-1 .tr-2,.layui-table-1 .tr-3{display:none;}
+.layui-table-2 .tr-1,.layui-table-2 .tr-3{display:none;}
+.layui-table-3 .tr-1,.layui-table-3 .tr-2{display:none;}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<form class="layui-form p-page">
+	<h3 class="pb-2">新增{:content_types_name($types)}课程</h3>
+    <table class="layui-table layui-table-form layui-table-0" id="pageTable">
+		<tr>
+			<td class="layui-td-gray">课程标题<font>*</font></td>
+			<td>
+				<input type="text" name="title" lay-verify="required" lay-reqText="请输入课程标题" placeholder="请输入课程标题" class="layui-input">
+			</td>
+			<td class="layui-td-gray">课程分类<font>*</font></td>
+			<td>
+			  <select name="cate_id" lay-verify="required" lay-reqText="请选择分类">
+				<option value="">请选择分类</option>
+				{volist name=":get_base_data('course_cate')" id="v"}
+				<option value="{$v.id}">{$v.title}</option>
+				{/volist}
+			  </select>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">学习对象<font>*</font></td>
+			<td>
+				<input type="radio" name="learn_types" lay-filter="types" value="0" title="全部" checked>
+				<input type="radio" name="learn_types" lay-filter="types" value="1" title="部门">
+				<input type="radio" name="learn_types" lay-filter="types" value="2" title="岗位">
+				<input type="radio" name="learn_types" lay-filter="types" value="3" title="员工">
+			</td>
+			<td class="layui-td-gray">所属讲师</td>
+			<td>
+			  <input type="text" name="lecturer" value="" placeholder="请选择讲师" class="layui-input picker-oa" data-types="lecturer" data-field="name" readonly lay-verify="required" lay-reqText="请选择所属讲师">
+			  <input type="hidden" name="lecturer_id" value="0">
+			</td>
+		</tr>
+		<tr class="tr-1">
+			<td class="layui-td-gray-2">参与学习部门<font>*</font></td>
+			<td colspan="3">
+				<input type="text" name="departments" value="" placeholder="请选择参与学习部门" readonly class="layui-input picker-oa" data-types="department" data-type="2">
+				<input type="hidden" name="dids" value="">
+			</td>
+		</tr>
+		<tr class="tr-2">
+			<td class="layui-td-gray-2">参与学习岗位<font>*</font></td>
+			<td colspan="3">
+				<input type="text" name="positions" value="" placeholder="请选择参与学习岗位" readonly class="layui-input picker-oa" data-types="position" data-type="2"">
+				<input type="hidden" name="pids" value="">
+			</td>
+		</tr>
+		<tr class="tr-3">
+			<td class="layui-td-gray-2">参与学习人员<font>*</font></td>
+			<td colspan="3">
+				<input type="text" name="unames" value="" placeholder="请选择参与学习人员" readonly class="layui-input picker-admin" data-type="2">
+				<input type="hidden" name="uids" value="">
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray" style="vertical-align:top;">课程简介<font>*</font></td>
+			<td colspan="3">
+				<textarea name="desc" placeholder="请输入课程简介，不能超过200个字" class="layui-textarea" lay-verify="required" lay-reqText="请完善课程简介"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray-2">
+				<div class="layui-input-inline">课件附件</div>
+				<div class="layui-input-inline">
+					<button type="button" class="layui-btn layui-btn-xs" id="uploadBtn"><i class="layui-icon"></i></button>
+				</div>
+			</td>
+			<td colspan="3" style="line-height:inherit">
+				<div class="layui-row" id="uploadBox">
+					<input type="hidden" data-type="file" data-type="file" name="courseware" value="">
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray" style="vertical-align:top;">课程介绍<font>*</font></td>
+			<td colspan="3">
+				<textarea name="content" placeholder="请输入内容" class="layui-textarea" id="container" style="border:0;padding:0"></textarea>
+			</td>
+		</tr>
+    </table>
+    <div class="pt-4">
+		<input type="hidden" name="types" value="{$types}">
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+const moduleInit = ['tool','uploadPlus','oaPicker','tinymce'];
+function gouguInit() {
+	var form = layui.form,tool=layui.tool,table=layui.table,uploadPlus = layui.uploadPlus,oaPicker  = layui.oaPicker;
+		form.on('radio(types)', function (data) {
+			$('#pageTable').attr('class','layui-table layui-table-form layui-table-'+data.value);
+		});
+		//相关附件上传
+		var attachment = new uploadPlus();
+		//编辑器初始化
+		var editor = layui.tinymce;
+		var edit = editor.render({
+			menubar:false,
+			toolbar: 'undo redo | bold italic underline strikethrough removeformat | alignleft aligncenter alignright alignjustify outdent indent | bullist numlist link image',
+			selector: "#container",
+			images_upload_url: '/api/index/upload/sourse/tinymce',//图片上传接口
+			height: 500
+		});
+
+		//封面上传
+		var uploadInst = layui.upload.render({
+			elem: '#test1'
+			, url: "/api/index/upload"
+			, done: function (res) {
+				layer.msg(res.msg);
+				if (res.code == 0) {
+					//上传成功
+					$('#demo1 input').attr('value', res.data.id);
+					$('#demo1 img').attr('src', res.data.filepath);
+				}
+			}
+		});
+	
+	
+		$('body').on('click','[name="lecturer"]',function(){
+			let that = $(this),ids = [],titles=[],map = {};
+			let callback = function(data){
+				for ( var i = 0; i <data.length; i++){
+					ids.push(data[i].id);
+					titles.push(data[i].name);
+				}
+				that.val(titles.join(','));
+				that.next().val(ids.join(','));
+			}
+			let opts={
+				"title":"选择讲师",
+				"url": "/course/api/get_lecturer",
+				"ids":"",
+				"titles":"",
+				"area": ['600px', '580px'],
+				"cols":[{field: 'id',width: 80,title:'序号',align:'center'},{ field: 'level_str', width: 100, title: '讲师等级', align: 'center' },{ field: 'education_str', width: 100, title: '学历', align: 'center' },{field:'name',title:'讲师'}]
+			}
+			oaPicker.picker(opts,1,callback,map);//单选
+		})
+
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			if(data.field.learn_types==1 && data.field.departments==''){
+				layer.msg('请完善参与的学习部门');
+				return false;
+			}
+			if(data.field.learn_types==2 && data.field.positions==''){
+				layer.msg('请完善参与的学习岗位');
+				return false;
+			}
+			if(data.field.learn_types==3 && data.field.unames==''){
+				layer.msg('请完善参与的学习人员');
+				return false;
+			}
+			data.field.content = tinyMCE.editors['container'].getContent();
+			if (data.field.content == '') {
+				layer.msg('请先完善课程内容');
+				return false;
+			}
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					tool.sideClose(1000);
+				}
+			}
+			tool.post("/course/course/add", data.field, callback);
+			return false;
+		});
+
+  }
+
+</script>
+{/block}
+<!-- /脚本 -->

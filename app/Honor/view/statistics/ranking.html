@@ -1,0 +1,107 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-3">
+<div class="layui-row layui-col-space12">
+	<div class="layui-col-md6">
+		<div class="layui-card">
+			<div class="layui-card-header" style="height:45px; line-height:45px;"><h3>按学分排名</h3><span class="excel-credit pull-right blue" style="cursor:pointer">导出EXCEL</span></div>
+			<div style="padding:2px 12px 6px;">
+				<table class="layui-table" id="credit-table">
+					<colgroup>
+					  <col width="80">
+					  <col width="150">
+					  <col width="100">
+					  <col width="100">
+					  <col width="200">
+					  <col width="150">
+					</colgroup>
+					<thead>
+					<tr>
+						<th style="text-align:center;">排名</th>
+						<th style="text-align:center;">姓名</th>
+						<th style="text-align:center;">学分</th>
+						<th style="text-align:center;">积分</th>
+						<th style="text-align:center;">所在部门</th>
+						<th style="text-align:center;">岗位职称</th>
+					</tr>
+					</thead>
+					<tbody>
+					{volist name="rank_credit" id="vo" key="k"}
+					<tr>
+						<td style="text-align:center;">{$k}</td>
+						<td style="text-align:center;">{$vo.name}</td>
+						<td style="text-align:center; color:#FF5722">{$vo.credit}</td>
+						<td style="text-align:center; color:#47B347">{$vo.integral}</td>
+						<td style="text-align:center;">{$vo.department}</td>
+						<td style="text-align:center;">{$vo.position}</td>
+					</tr>
+					{/volist}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	
+	<div class="layui-col-md6">
+		<div class="layui-card">
+			<div class="layui-card-header" style="height:45px; line-height:45px;"><h3>按积分排名</h3><span class="excel-integral pull-right blue" style="cursor:pointer">导出EXCEL</span></div>
+			<div style="padding:2px 12px 6px;">
+				<table class="layui-table" id="integral-table">
+					<colgroup>
+					  <col width="80">
+					  <col width="150">
+					  <col width="100">
+					  <col width="100">
+					  <col width="200">
+					  <col width="150">
+					</colgroup>
+					<thead>
+					<tr>
+						<th style="text-align:center;">排名</th>
+						<th style="text-align:center;">姓名</th>
+						<th style="text-align:center;">积分</th>
+						<th style="text-align:center;">学分</th>
+						<th style="text-align:center;">所在部门</th>
+						<th style="text-align:center;">岗位职称</th>
+					</tr>
+					</thead>
+					<tbody>
+					{volist name="rank_integral" id="vo" key="kk"}
+					<tr>
+						<td style="text-align:center;">{$kk}</td>
+						<td style="text-align:center;">{$vo.name}</td>
+						<td style="text-align:center; color:#FF5722">{$vo.integral}</td>
+						<td style="text-align:center; color:#47B347">{$vo.credit}</td>
+						<td style="text-align:center;">{$vo.department}</td>
+						<td style="text-align:center;">{$vo.position}</td>
+					</tr>
+					{/volist}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+	<script>
+	const moduleInit = ['tool','excel'];
+	function gouguInit() {
+		var tool = layui.tool, excel = layui.excel;
+		
+		$('body').on('click','.excel-credit',function(){
+			excel.init('credit-table',{name: '按学分排名'});
+		})
+		
+		$('body').on('click','.excel-integral',function(){
+			excel.init('integral-table',{name: '按积分排名'});
+		})
+
+	}
+	</script>
+{/block}
+<!-- /脚本 -->

@@ -1,0 +1,98 @@
+{extend name="../../base/view/common/base" /}
+<!-- 主体 -->
+{block name="body"}
+
+<div class="p-page">
+	<table class="layui-hide" id="table_course_cate" lay-filter="table_course_cate"></table>
+</div>
+
+<script type="text/html" id="toolbarDemo">
+  <div class="layui-btn-group">
+	<button class="layui-btn layui-btn-sm add-menu">+ 添加课程分类</button>
+  </div>
+</script>
+
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	const moduleInit = ['tool'];
+	function gouguInit() {
+		var treeTable = layui.treeTable, tool = layui.tool;
+		
+		layui.pageTable = treeTable.render({
+			elem: "#table_course_cate"
+			,title: '课程分类列表'
+			,toolbar: '#toolbarDemo'
+			,url: "/course/cate/datalist"
+			,tree: { // treeTable 特定属性集
+				customName: {name:'title'},
+				data: {},
+				view: {
+					showIcon:false,
+					expandAllDefault:true
+				},
+				async: {},
+					callback: {}
+				}
+				,cols: [[
+					{field:'id',width:80, title: 'ID号', align:'center'}
+					,{field: 'sort', title: '排序',align:'center', width:80}
+					,{field:'title', width:240, title: '分类名称'}
+					,{field:'pid', title: '父级ID', width:80, align:'center'}
+					,{field:'desc', title: '描述', }
+					,{width:160,title: '操作', align:'center',templet: function(d){
+						var html = '<span class="layui-btn-group"><button class="layui-btn layui-btn-normal layui-btn-xs" lay-event="add">添加子分类</button><button class="layui-btn layui-btn-xs" lay-event="edit">编辑</button><button class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</button></span>';
+					return html;
+					  }
+					}
+				]]
+				,page:false
+				//,skin:'line'
+			});
+			
+		treeTable.on('tool(table_course_cate)',function (obj) {
+			if (obj.event === 'add') {
+					tool.side('/course/cate/add?pid='+obj.data.id);
+					return;
+				}
+				if (obj.event === 'edit') {
+					tool.side('/course/cate/add?id='+obj.data.id);
+					return;
+				}
+			if(obj.event === 'disable'){
+				layer.confirm('确定要禁用该记录吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layui.pageTable.reload();
+						}
+					}
+					tool.post("/course/cate/set", {id:obj.data.id,status: 0}, callback);
+					layer.close(index);
+				});
+			}
+			if(obj.event === 'open'){
+				layer.confirm('确定要启用该记录吗?', {icon: 3, title:'提示'}, function(index){
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							layui.pageTable.reload();
+						}
+					}
+					tool.post("/course/cate/set", {id:obj.data.id,status:1}, callback);
+					layer.close(index);
+				});
+			}
+		});
+		//表头工具栏事件
+		$('.add-menu').on('click', function(){
+			tool.side('/course/cate/add');
+			return;
+		});
+	}
+</script>
+{/block}
+<!-- /脚本 -->

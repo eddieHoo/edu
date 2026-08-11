@@ -1,0 +1,520 @@
+{extend name="../../base/view/common/base" /}
+{block name="style"}
+<script src="/static/jquery.min.js"></script>
+<script src="/static/assets/third_party/jquery.countdown.js"></script>
+<style>
+.paper-box{padding-right:430px;user-select: none;}
+.paper-box .layui-card-header h3{font-size:16px; line-height:45px;}
+.paper-box .layui-card-header h3 span{font-size:14px; color:#666;}
+
+.paper-box .paper-box-item{padding-bottom:8px;}
+.paper-box .paper-box-item-t{line-height:32px;}
+.paper-box .paper-box-item-desc{padding:5px 0 5px 18px; font-size:12px; color:#666; line-height:1.5}
+.paper-box .paper-box-item-img{padding:5px;}
+.paper-box .paper-box-item-img img{max-width:90%}
+.paper-box-item-main{padding:3px 0;}
+
+.paper-box .option{line-height:30px; border-radius:3px; display:block; background:#fff; color:#666;padding: 2px 0;padding-left: 15px; position: relative;}
+.paper-box .option label{display:block; margin-left:28px;}
+.paper-box .option:hover{background:#f5f5f5;}
+.paper-box .option-res{line-height:30px; border-radius:3px; display:block; color:#666;padding: 2px 0;padding-left: 15px;}
+
+.paper-box input[type=checkbox],
+.paper-box input[type=radio] {
+    position: relative; width: 18px; height: 18px; border: 1px solid #e0e0e0; outline: 0; border-radius: 50%; background: #fff; vertical-align: middle;box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -moz-transition-duration: 300ms;
+    -webkit-transition-duration: 300ms;
+    transition-duration: 300ms;
+    -webkit-transition-property: border-color;
+    transition-property: border-color;
+}
+
+.paper-box input[type=checkbox]{border-radius:0;}
+.paper-box .checkbox-inline input[type=checkbox],
+.paper-box .radio-inline input[type=radio]{
+	position: absolute; top: 50%;margin-top: -9px; cursor: pointer;
+}
+
+.paper-box input[type=checkbox]:checked,
+.paper-box input[type=radio]:checked {
+	border-color: #16b777; background: #16b777;
+}
+.paper-box input[type=radio]:checked {border: 2px solid #16b777; background: #fff;}
+.paper-box input[type=radio]:checked:before { content: " ";  display: inline-block; height: 10px; width: 10px; background: #16b777;  border-radius: 50%;  position: absolute; top: 2px; margin-left: 2px;}
+.paper-box input[type=checkbox]:checked:before { content: " "; display: inline-block; height: 5px; width: 10px; border-width: 2px 2px 0 0; border-color: #fff;border-style: solid; position: absolute; top: 3px; margin-left: 2px;
+    -webkit-transform: rotate(130deg);
+    -ms-transform: rotate(130deg);
+    -moz-transform: rotate(130deg);
+    transform: rotate(130deg);
+}
+
+
+.answer-box{width:415px;position:fixed; top:15px; right:12px; z-index:996; background-color: #fff; box-shadow: 0 2px 4px 0 rgb(0 0 0 / 6%); border-radius: 4px;user-select: none;}
+.answer-box-title{width:100%; height:38px; line-height:38px; border-bottom:1px solid #f8f8f8; border-radius: 4px 4px 0 0;}
+.answer-box-title h1{width:75px; height:38px; background:#16b777; text-align:center; font-size:16px; display:block; float:left; color:#fff; border-radius: 4px 0 0 0;}
+.answer-box-title p{width:338px; height:38px; text-align:center; display:block; float:right;}
+.answer-box-title p.test_res{font-size:14px;color:#FF2323}
+
+.answer-content{width:100%; height:100%; font-size:14px;}
+.answer-content-t{height:36px; padding:0 12px; line-height:36px;}
+.answer-content-t h2{font-size:14px; font-weight:600}
+.answer-content-t h2 span{margin-left:10px; color:#666;font-size:12px;font-weight:400}
+.answer-sheet{padding:0 12px 6px; border-bottom:1px solid #eeeeee;}
+.answer-sheet ul{text-align:left;}
+.answer-sheet li{display:inline-block; margin-bottom:5px;}
+.answer-sheet li a{height:27px; width:27px; line-height:27px; text-align:center; display:block; background-color:#f8f8f8; border:1px solid #e8e8e8; border-radius:3px;}
+.answer-sheet li a:hover{color:#16b777; border-color: #16b777;}
+.answer-sheet li a.answered{background-color:#16b777; border-color: #16b777; color:#fff;}
+
+.answer-tips{padding:6px 12px; text-align:center;}
+.answer-bottom{padding:8px 12px; height:36px; border:1px solid #eee;}
+.answer-bottom-time{float:left; line-height:36px; font-size:18px;}
+.answer-bottom-btn{float:right;}
+</style>
+{/block}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-page">
+	<h3 class="pb-2">试卷信息 【{$detail.title}】</h3>
+	<div class="paper-box">				
+		{volist name="section" id="vo" key="k"}					
+			<div class="layui-card">
+				<div class="layui-card-header">
+					<h3>{$vo.title} <span>（共 {$vo.num} 题， 合计 {$vo.total_score} 分）</span></h3>
+				</div>
+			
+				<div class="layui-card-body">
+				{empty name="vo.questions"}
+					<div style="text-align:center" class="red">该章节的试题抽取失败，请联系组卷人员重新选择组卷条件。</div>
+				{else/}
+				<ul>
+					{volist name="vo.questions" id="voo" key="kk"}
+					{if ($voo.types == 1)}
+					<li class="paper-box-item" id="qu_{$k}_{$kk}" data-type="{$voo.types}" data-qid="{$voo.id}" data-answer="">
+						<div class="paper-box-item-t">
+							{$kk}.【判断题】{$voo.title}
+							{notempty name="$voo.desc"}
+							<div class="paper-box-item-desc">{$voo.desc}</div>
+							{/notempty}
+							{gt name="$voo.thumb" value="0"}
+							<div class="paper-box-item-img"><img src="{:get_file($voo.thumb)}"></div>
+							{/gt}
+						</div>
+						<div class="paper-box-item-main">
+							<ul>
+								{volist name="voo.q_select" id="vooo" key="kkk"}
+								<li class="option radio-inline">
+									<input class="select-input" type="radio" value="{:decimal2ABC($key)}" name="qu_{$k}_{$kk}" id="label_{$k}_{$kk}_{$kkk}"><label for="label_{$k}_{$kk}_{$kkk}">{:decimal2ABC($key)}、{$vooo}</label>
+								</li>
+								{/volist}													
+							</ul>
+						</div>
+					</li>
+					{elseif ($voo.types == 2)}
+					<li class="paper-box-item" id="qu_{$k}_{$kk}" data-type="{$voo.types}" data-qid="{$voo.id}" data-answer="">
+						<div class="paper-box-item-t">
+							{$kk}.【单选题】{$voo.title}
+							{notempty name="$voo.desc"}
+							<div class="paper-box-item-desc">{$voo.desc}</div>
+							{/notempty}
+							{gt name="$voo.thumb" value="0"}
+							<div class="paper-box-item-img"><img src="{:get_file($voo.thumb)}"></div>
+							{/gt}
+						</div>
+						<div class="paper-box-item-main">
+							<ul>
+								{volist name="voo.q_select" id="vooo" key="kkk"}
+								<li class="option radio-inline">
+									<input class="select-input" type="radio" value="{:decimal2ABC($key)}" name="qu_{$k}_{$kk}" id="label_{$k}_{$kk}_{$kkk}"><label for="label_{$k}_{$kk}_{$kkk}">{:decimal2ABC($key)}、{$vooo}</label>
+								</li>
+								{/volist}													
+							</ul>
+						</div>
+					</li>	
+					{elseif ($voo.types == 3)}
+					<li class="paper-box-item" id="qu_{$k}_{$kk}" data-type="{$voo.types}" data-qid="{$voo.id}" data-answer="">
+						<div class="paper-box-item-t">
+							{$kk}.【多选题】{$voo.title}
+							{notempty name="$voo.desc"}
+							<div class="paper-box-item-desc">{$voo.desc}</div>
+							{/notempty}
+							{gt name="$voo.thumb" value="0"}
+							<div class="paper-box-item-img"><img src="{:get_file($voo.thumb)}"></div>
+							{/gt}
+						</div>
+						<div class="paper-box-item-main">
+							<ul>
+								{volist name="voo.q_select" id="vooo" key="kkk"}
+								<li class="option checkbox-inline">
+									<input class="select-input" type="checkbox" value="{:decimal2ABC($key)}" name="qu_{$k}_{$kk}" id="label_{$k}_{$kk}_{$kkk}"><label for="label_{$k}_{$kk}_{$kkk}">{:decimal2ABC($key)}、{$vooo}</label>
+								</li>
+								{/volist}													
+							</ul>
+						</div>
+					</li>
+					{elseif ($voo.types == 4)}
+					<li class="paper-box-item" id="qu_{$k}_{$kk}" data-type="{$voo.types}" data-qid="{$voo.id}" data-answer="">
+						<div class="paper-box-item-t">
+							{$kk}.【填空题】{$voo.title}
+							{notempty name="$voo.desc"}
+							<div class="paper-box-item-desc">{$voo.desc}</div>
+							{/notempty}
+							{gt name="$voo.thumb" value="0"}
+							<div class="paper-box-item-img"><img src="{:get_file($voo.thumb)}"></div>
+							{/gt}
+						</div>
+						<div class="paper-box-item-main">
+							<div  style="width:100%">
+								<input type="text" placeholder="请输入" class="layui-input answer-input" name="qu_{$k}_{$kk}" id="label_{$k}_{$kk}" />
+							</div>
+						</div>
+					</li>
+					{elseif ($voo.types == 5)}
+					<li class="paper-box-item" id="qu_{$k}_{$kk}" data-type="{$voo.types}" data-qid="{$voo.id}" data-answer="">
+						<div class="paper-box-item-t">
+							{$kk}.【问答题】{$voo.title}
+							{notempty name="$voo.desc"}
+							<div class="paper-box-item-desc">{$voo.desc}</div>
+							{/notempty}
+							{gt name="$voo.thumb" value="0"}
+							<div class="paper-box-item-img"><img src="{:get_file($voo.thumb)}"></div>
+							{/gt}
+						</div>
+						<div class="paper-box-item-main">
+							<div  style="width:100%">
+								<textarea placeholder="请输入" class="layui-textarea answer-input" name="qu_{$k}_{$kk}" id="label_{$k}_{$kk}"></textarea>
+							</div>
+						</div>
+					</li>
+					{/if}
+					{/volist}									
+				</ul>
+				{/empty}
+				</div>
+			</div>
+		{/volist}
+	</div>
+		
+		
+	<div class="answer-box">
+		<div class="answer-box-title">
+			<h1>答题卡</h1>
+			<p class="answer-time">考试周期：<strong>{$detail.start_time_str} 至 {$detail.end_time_str}</strong></p>
+		</div>
+		{volist name="section" id="vo" key="k"}					
+		<div class="answer-content">
+			<div class="answer-content-t">
+				<h2>{$vo.title}<span class="r">共 {$vo.num} 题</span></h2>
+			</div>
+			<div class="answer-sheet">
+				{empty name="vo.questions"}
+					<div style="text-align:center" class="red">该章节的试题抽取失败，请联系组卷人员重新选择组卷条件。</div>
+				{else/}
+				<ul>
+					{volist name="vo.questions" id="voo" key="kk"}	
+					<li><a name="qu_{$k}_{$kk}" href="javascript:go('qu_{$k}_{$kk}');">{$kk}</a></li>
+					{/volist}
+				</ul>
+				{/empty}
+			</div>
+		</div>	
+		{/volist}
+		<div class="answer-tips">总分<strong class="red"> {$detail.total_score} </strong>分，优秀<strong class="blue"> {$detail.good_score} </strong>分，及格<strong class="green"> {$detail.pass_score} </strong>分，考试时长：<strong>{$detail.hour}:{$detail.minute>9?$detail.minute:'0'.$detail.minute}:00</strong></div>
+		<div class="answer-bottom">
+			<div class="answer-bottom-time red">剩余时间：<strong class="alt-1">{$detail.hour}:{$detail.minute>9?$detail.minute:'0'.$detail.minute}:00</strong></div>
+			<div class="answer-bottom-btn"><button type="button" class="layui-btn layui-bg-blue" onclick="getAnswer()">我要交卷</button></div>
+		</div>
+	</div>
+</div>
+
+<div id="box" style="display:none;">
+	<div style="padding:10px">
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray">试卷名称</td>
+			<td colspan="5">{$detail.title}</td>
+		</tr>	
+		<tr>
+			<td class="layui-td-gray">所属类别</td>
+			<td>{$detail.cate}</td>			
+			<td class="layui-td-gray-2">开放考试周期</td>
+			<td>{$detail.start_time_str} 至 {$detail.end_time_str}</td>
+			<td class="layui-td-gray">考试时长</td>
+			<td>{:getTimeBySec($detail.duration,false)}</td>
+		</tr>	
+		<tr>
+			<td class="layui-td-gray">考试性质</td>
+			<td>
+			{eq name="$detail.types" value="1"}<span class="green">常规考试</span>{/eq}
+			{eq name="$detail.types" value="2"}<span class="blue">课程考试</span>{/eq}
+			{eq name="$detail.types" value="3"}<span class="red">培训考试</span>{/eq}
+			</td>			
+			<td class="layui-td-gray">试卷总分</td>
+			<td>{$detail.total_score}<span class="red">（{$detail.good_score} 分优秀，{$detail.pass_score} 分及格）</span></td>
+			<td class="layui-td-gray">考试人</td>
+			<td>{$admin.name|default=''}</td>
+		</tr>
+		{eq name="$detail.types" value="2"}
+		<tr>
+			<td class="layui-td-gray">线上课程</td>
+			<td colspan="5">{$detail.course}</td>
+		</tr>
+		{/eq}
+		{eq name="$detail.types" value="3"}
+		<tr>
+			<td class="layui-td-gray">线下培训</td>
+			<td colspan="5">{$detail.exam}</td>
+		</tr>
+		{/eq}
+		{notempty name="$detail.desc"}
+		<tr>
+			<td class="layui-td-gray">考试说明</td>
+			<td colspan="5"><pre style="font-family:inherit">{$detail.desc}</pre></td>
+		</tr>
+		{/notempty}
+		{notempty name="$detail.rules"}
+		<tr>
+			<td class="layui-td-gray">答题规则</td>
+			<td colspan="5"><pre style="font-family:inherit">{$detail.rules}</pre></td>
+		</tr>
+		{/notempty}
+		{notempty name="$detail.methods"}
+		<tr>
+			<td class="layui-td-gray-2">违规处理办法</td>
+			<td colspan="5"><pre style="font-family:inherit"  class="red">{$detail.methods}</pre></td>
+		</tr>
+		{/notempty}
+	</table>
+	</div>
+</div>
+
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+const paper_id = {$detail.id|default=0};
+const snapshot_id = {$snapshot_id|default=0};
+const exam = {$exam|default=0};
+var duration = {$duration|default=0};
+
+function go(id){
+	  var top = $('#' + id).offset().top;
+	  $('html, body').animate({
+		 scrollTop: top
+	  }, 500)
+}
+
+//取多选框checkbox的值
+function getCheckbox(name) {
+	var checkboxs = document.getElementsByTagName('input');
+	if (!checkboxs) return;
+	var valueArray = [];
+	var str = '';
+	for (var i = 0; i < checkboxs.length; i++) {
+		if (checkboxs[i].type == 'checkbox' && checkboxs[i].name == name && checkboxs[i].checked) {
+			valueArray.push(checkboxs[i].value);
+		}
+	}
+	str=valueArray.join('');
+	return str;
+}
+
+//取单选框radio的值
+function getRadio(name) {
+	var radios = document.getElementsByTagName('input');
+	if (!radios) return;
+	var value = '';
+	for (var i = 0; i < radios.length; i++) {
+		if (radios[i].type == 'radio' && radios[i].name == name && radios[i].checked) {
+			value = radios[i].value;
+			break;
+		}
+	}
+	return value;
+}
+
+//提交答卷
+var toPost=0;
+function getAnswer(){
+	let answerStr='';
+	let item=$(".paper-box-item");
+	let space = 0;
+	for(var i=0;i<item.length;i++){
+		var answer = $(item[i]).data("answer"),qid = $(item[i]).data("qid");
+		if(answer == ''){
+			space++;
+		}
+		answerStr+=qid+"→"+answer+"〒";
+	}
+	answerStr=answerStr.substring(0, answerStr.length-1);
+	console.log(answerStr);
+	//return;
+	if(toPost==0){
+		let confirmTips = '确认现在交卷吗?';
+		if(space>0){
+			confirmTips = '您还有 '+space+' 道试题未完成，确认现在交卷吗?';
+		}
+		layer.confirm(confirmTips, {icon: 3, title:'提示'},function (index) {
+			toPost=1;
+			$.ajax({
+				url: '/exam/api/save_answer',
+				cache: false,
+				type:'POST',
+				data:{paper_id:paper_id,snapshot_id:snapshot_id,answer:answerStr,duration:duration},
+				success: function(res){
+					toPost=0;
+					layer.msg(res.msg);
+					if(res.code==0){
+						window.location.href='/exam/exam/view/id/'+res.data.id;
+					}
+				},
+				complete:function(){
+					toPost=0;
+				},
+				error:function(){
+					toPost=0;
+				}
+			});
+		})
+	}
+}
+
+
+function autoPost(){
+	var second = 10;
+	var interval;
+	layer.open({
+		type: 1,
+		title: '提示',
+		skin: 'layui-layer-rim', //加上边框
+		closeBtn: false,
+		area: ['420px', '240px'], //宽高
+		content: '<div style="padding:20px; font-size:20px; line-height:2; text-align:center; color:#FF571E">答题时间已到！<br>系统将会在 <span class="layer-sec">10</span> 秒内自动交卷</div>',
+		success: function(a,b){
+			var fn = function() {
+				$(".layer-sec").text(second);
+				second--;
+			};
+			interval = setInterval(function(){
+				fn();
+				if(second === 0){
+					clearInterval(interval);
+					let answerStr='';
+					let item=$(".paper-box-item");
+					for(var i=0;i<item.length;i++){
+						var answer = $(item[i]).data("answer"),qid = $(item[i]).data("qid");
+						answerStr+=qid+"→"+answer+"〒";
+					}							
+					answerStr=answerStr.substring(0, answerStr.length-1);
+					$.ajax({
+						url: '/exam/api/save_answer',
+						cache: false,
+						type:'POST',
+						data:{paper_id:paper_id,answer:answerStr,duration:duration},
+						success: function(res){
+							toPost=0;
+							layer.msg(res.msg);
+							if(res.code==0){
+								window.location.href='/exam/exam/view/id/'+res.data.id;
+							}
+						},
+						complete:function(){
+							toPost=0;
+						},
+						error:function(){
+							toPost=0;
+						}
+					});
+				}
+			}, 1000);
+		},
+		end:function(){
+			clearInterval(interval);
+		}
+	});	
+}
+
+const moduleInit = ['tool'];
+function gouguInit() {
+
+	if(exam==0){
+		layer.open({
+			type: 1, // page 层类型
+			area: ['800px', '550px'],
+			title: '考试须知',
+			shade: 0.9, // 遮罩透明度
+			closeBtn: 0, // 点击遮罩区域，关闭弹层
+			content: $('#box'),
+			btnAlign: 'c',
+			btn: ['我已阅读考试须知，确认开始考试'], // 按钮
+			yes: function(index, layero, that){
+				location.href='/exam/exam/exam?id='+paper_id+'&e=1';
+			  }
+		});
+		
+	}else{
+	
+		$('.alt-1').countDown({
+			css_class : 'countdown-alt-1'
+		});
+		
+		//倒计时结束回调
+		$('.alt-1').on('time.elapsed', function () {
+			//layer.msg('预览页面仅供查看，不能体验功能');
+			autoPost();
+		});
+		//倒计时进行中回调
+		$('.alt-1').on('time.tick', function () {
+			duration++;
+		});	
+		
+		$('body').on('click','.select-input',function(e) {
+			let selected = '';
+			let examLi = $(this).parents('.paper-box-item');
+			let examId = examLi.attr('id'); // 得到题目ID
+			let type = examLi.data('type');
+			if(type == 3){
+				selected = getCheckbox(examId);
+			}
+			else{
+				selected = getRadio(examId);
+			}
+			console.log(selected);
+			examLi.data('answer',selected);
+			var cardLi = $('a[name="' + examId + '"]'); // 根据题目ID找到对应答题卡
+			// 设置已答题
+			if(!cardLi.hasClass('answered')){
+				cardLi.addClass('answered');
+			}
+			if(selected ==''){
+				cardLi.removeClass('answered');
+			}
+		})
+		
+		$('body').on('input','.answer-input',function(e) {
+			let selected = '';
+			let examLi = $(this).parents('.paper-box-item');
+			let examId = examLi.attr('id'); // 得到题目ID
+			selected = $(this).val();
+			examLi.data('answer',selected);
+			var cardLi = $('a[name="' + examId + '"]'); // 根据题目ID找到对应答题卡
+			// 设置已答题
+			if(!cardLi.hasClass('answered')){
+				cardLi.addClass('answered');
+			}
+			if(selected ==''){
+				cardLi.removeClass('answered');
+			}
+		})
+	}
+}
+</script>
+{/block}
+<!-- /脚本 -->

@@ -1,0 +1,55 @@
+<div class="layui-row layui-col-space16">
+	<div class="layui-col-md12">
+		<div class="layui-card">
+			<div class="layui-card-title">在线考试</div>
+			<div style="padding: 12px;">
+				<table id="exam" lay-filter="exam" class="layui-hide" style="margin-top:0"></table>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+//任务
+function layoutExam(table){
+	table.render({
+		elem: '#exam'
+		, url: "/exam/api/get_paper?limit=10" //数据接口
+		, page: false //开启分页
+		, cols: [[ //表头
+			{field: 'id', title: 'ID编号', width: 80, align: 'center', fixed: 'left'}
+			,{field:'cate',width:120, title: '所属分类', align:'center'}
+			,{field:'title',title: '试卷名称', minWidth: 200,templet:function(d){
+					var html = '<a data-href="/exam/exam/exam/id/'+d.id+'.html" class="side-a">'+d.title+'</a>';
+					return html;
+			}}
+			,{field:'types',width:80, title: '考试性质', align:'center',templet: function(d){
+				var html1='<span class="green">培训考试</span>';
+				var html2='<span class="blue">日常考试</span>';
+				if(d.types==1){
+					return html1;
+				}
+				else{
+					return html2;
+				}
+			}}
+			,{field:'start_time',width:260, title: '考试开放周期', align:'center',templet: function(d){
+					return d.start_time +' 至 '+ d.end_time;
+				}}
+				,{field:'duration',width:100, title: '考试时长', align:'center',templet: function(d){
+					return d.hour +'小时'+ d.minute +'分 ';
+				}}
+				,{field:'total_score',width:80, title: '试卷总分', align:'center'}
+				,{field:'status', title: '状态',width:80,align:'center',templet: function(d){
+					var html1='<span class="green">已考试</span>';
+					var html2='<span class="red">未考试</span>';
+					if(d.record_count==0){
+						return html2;
+					}
+					else{
+						return html1;
+					}
+				}}
+		]]
+	});
+}
+</script>
