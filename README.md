@@ -1,9 +1,8 @@
 # 勾股Edu学习培训与考试系统
 
 #### 介绍
-勾股Edu是由勾股技术团队打造的一套业内领先的线上学习、培训、考试一体化解决方案。勾股Edu基于ThinkPHP + Layui + MySql开发，系统集成了系统管理、员工办公、人事行政、线上课程、面授培训、在线考试、荣誉证书、知识网盘八大功能模块。系统操作简约，开箱即用，可快捷方便创建学习任务、培训任务、试题和题库，发布试卷，组织考试，自动阅卷等，实现企业内部员工学习、培训、考试一体化管理。
-
-![输入图片说明](https://admin.gougucms.com/oss/edu0.png "培训与考试模块.png")
+勾股Edu是由勾股技术团队研发的一套业内领先的线上学习、培训、考试一体化解决方案。勾股Edu基于ThinkPHP + Layui + MySql开发，系统集成了系统管理、员工办公、人事行政、线上课程、面授培训、在线考试、荣誉证书、知识网盘八大功能模块。系统操作简约，开箱即用，可快捷方便创建学习任务、培训任务、试题和题库，发布试卷，组织考试，自动阅卷等，实现企业内部员工学习、培训、考试一体化管理。
+![输入图片说明](public/static/home/images/edu0.png)
 
 ### ✳️ 演示地址
 
@@ -15,7 +14,7 @@ PS：为了给后面的人提供良好的演示体验，体验以查看为主，
 
 体验账号及密码：
 ~~~
-BOSS角色：suhaizhen     123456
+管理角色：suhaizhen     123456
 总 经 理：yiyeshu      123456
 普通人员：fengcailing      123456
 ~~~
@@ -46,11 +45,11 @@ BOSS角色：suhaizhen     123456
 
 **命令行安装（推荐）**
 
-推荐使用命令行安装，因为采用命令行安装的方式可以和勾股edu随时保持更新同步。使用命令行安装请提前准备好`Git`、`Composer`。
+推荐使用命令行安装，因为采用命令行安装的方式可以和勾股Edu随时保持更新同步。使用命令行安装请提前准备好`Git`、`Composer`。
 
-**勾股OA的安装步骤，以下加粗的内容需要特别留意：**
+**勾股Edu的安装步骤，以下加粗的内容需要特别留意：**
 
-第一步：克隆(下载)勾股EDU到你本地 **（如果不用git的可以在代码仓库上角打包下载代码，然后解压上传到服务器）** 
+第一步：克隆(下载)勾股Edu到你本地 **（如果不用git的可以在代码仓库上角打包下载代码，然后解压上传到服务器）** 
 ~~~
     git clone https://gitee.com/gouguopen/edu.git
 ~~~
@@ -142,25 +141,21 @@ composer config -g repos.packagist composer https://mirrors.aliyun.com/composer/
 12. 安装过程遇到更多问题请查看链接解决：https://blog.gougucms.com/home/book/detail/bid/3/id/100.html
 
 
-**最后，如果实在安装不成功，确实需要提供安装服务的，请搜索微信号：hdm588，或者QQ号：327725426，添加好友，注意备注[安装勾股系统]。开源不易，该服务需友情赞赏💰99元。**
+**最后，如果实在安装不成功，确实需要提供安装服务的，请搜索微信号：hdm588，或者QQ号：327725426，添加好友，注意备注[安装勾股系统]。**
 
 ### 🖼️ 界面截图预览
 
 |页面截图      |    部分截图|
 | :--------: | :--------:|
-| ![功能导图](https://admin.gougucms.com/oss/edu1.png "功能导图")|![功能导图](https://admin.gougucms.com/oss/edu2.png "功能导图")|
-|![功能导图](https://admin.gougucms.com/oss/edu3.png "功能导图")|![功能导图](https://admin.gougucms.com/oss/edu4.png "功能导图")|
+| ![功能导图](public/static/home/images/edu1.png "功能导图")|![功能导图](public/static/home/images/edu2.png "功能导图")|
+|![功能导图](public/static/home/images/edu3.png "功能导图")|![功能导图](public/static/home/images/edu4.png "功能导图")|
 
 ### ⭐ 开源助力
 
-- 开源协议：勾股EDU遵循Apache License 2.0开源协议发布。
+- 开源协议：勾股Edu遵循Apache License 2.0开源协议发布。
 - 版权声明：要求在软件和相关文档中保留包含原始版权声明等信息。
 - 免责声明：该软件是按现状提供的，没有任何明示或暗示的担保或保证，作者不承担任何赔偿责任。
 - 贡献参与：开源的系统少不了大家的参与，如果大家在体验的过程中发现有问题或者BUG，请到Issue里面反馈，谢谢！
 - 鼓励支持：如果觉得勾股EDU不错，不要吝啬您的赞许和鼓励，请给我们⭐ STAR ⭐吧！
 
-### 👍 支持我们
-- 商务合作、定制服务，请搜索微信号：hdm588，添加微信咨询了解🤝。
-- If the project is very helpful to you, you can buy the author a cup of coffee☕.
-- 如果这个项目对您有帮助，可以请作者喝杯咖啡哟☕（👇👇👇点击下面的捐赠支持我们👇👇👇）
 
