@@ -6,7 +6,7 @@
 
 ### ✳️ 演示地址
 
-勾股Edu演示地址：[https://edu.gougucms.com](https://www.gouguoa.com)
+勾股Edu演示地址：[https://edu.gougucms.com](https://edu.gougucms.com)
 
 沟通咨询请加微信号：hdm588
 
