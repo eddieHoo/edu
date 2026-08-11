@@ -56,29 +56,39 @@
 			</td>
 		</tr>
 		{/notempty}
-		{notempty name="$detail.paper_array"}
 		<tr>
 			<td class="layui-td-gray">关联考试</td>
 			<td colspan="7">
 				<table class="layui-table layui-table-min" style="margin:0">
 					<tr>
-						<th width="100">编号</th>
-						<th>标题</th>
-						<th width="150">考试时长</th>
-						<th width="100">总分</th>
+						<th width="300">试卷名称</th>
+						<th width="200">开放考试周期</th>
+						<th width="80">考试时长</th>
+						<th width="60">总分</th>
+						<th width="60">优秀分数线</th>
+						<th width="60">及格分数线</th>
+						<th width="100">创建时间</th>
 					</tr>
+					{notempty name="$detail.paper_array"}
 					{volist name="$detail.paper_array" id="vo"}
-						<tr>
-							<td>{$vo.id}</td>
-							<td style="text-align:left;">{$vo.title}</td>
-							<td>{:getTimeBySec($vo.duration)}</td>
-							<td>{$vo.total_num}</td>
-						</tr>
+					<tr>
+						<td style="text-align:left;">{$vo.title|default='-'}</td>
+						<td>{$vo.start_time|date='Y-m-d H:i'} 至 {$vo.end_time|date='Y-m-d H:i'}</td>
+						<td>{:getTimeBySec($vo.duration,false)}</td>
+						<td>{$vo.total_score}</td>
+						<td>{$vo.good_score}</td>
+						<td>{$vo.pass_score}</td>
+						<td>{$vo.create_time|date='Y-m-d H:i'}</td>
+					</tr>
 					{/volist}
+					{else/}
+					<tr class="plan-tr">
+						<td colspan="7" style="padding:20px; text-align:center; color:#999">暂无课程考试</td>
+					</tr>
+					{/notempty}
 				</table>
 			</td>
 		</tr> 
-		{/notempty}
     </table>
 	
 	<div class="layui-tabs" lay-filter="papertab" style="background-color:#fff; border:1px solid #eee;margin-top:12px">

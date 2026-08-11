@@ -66,7 +66,7 @@ class Api extends BaseController
 					['types','=',3],
 					['train_id','in',$train_ids]
 				];
-				$whereOr[] = $map65;
+				$whereOr[] = $map6;
 			}
 		}
 		$where[] = ['status', '>', 0];

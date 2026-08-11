@@ -53,7 +53,7 @@
 				layer.msg('评价分不能为0');
 				return false;
 			}
-			tool.post("/train/api/appraise_admin", data.field, callback,clickbtn);
+			tool.post("/train/learn/appraise_add", data.field, callback,clickbtn);
 			return false;
 		});
 	}
