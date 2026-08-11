@@ -875,7 +875,7 @@ CREATE TABLE `oa_course`  (
   `dids` varchar(500) NOT NULL DEFAULT '' COMMENT '指定部门',
   `pids` varchar(500) NOT NULL DEFAULT '' COMMENT '指定岗位',
   `uids` varchar(500) NOT NULL DEFAULT '' COMMENT '指定学员',
-  `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '状态：0未发布 1已发布',
+  `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '状态：0未发布 1已发布',
   `sort` int(10) NOT NULL DEFAULT 0 COMMENT '排序',
   `view` bigint(11) NOT NULL DEFAULT 0 COMMENT '浏览量',
   `admin_id` bigint(11) NOT NULL DEFAULT 0 COMMENT '创建人',

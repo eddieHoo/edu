@@ -53,21 +53,21 @@ class Api extends BaseController
 			];			
 			$course_ids = get_course($did,$pid,$uid);
 			$train_ids = get_train($did,$pid,$uid);
-			
+			$whereOr =[$map1,$map2,$map3,$map4];
 			if(!empty($course_ids)){
 				$map5=[
 					['types','=',2],
 					['course_id','in',$course_ids]
 				];
+				$whereOr[] = $map5;
 			}			
 			if(!empty($train_ids)){
 				$map6=[
 					['types','=',3],
 					['train_id','in',$train_ids]
 				];
+				$whereOr[] = $map65;
 			}
-			
-			$whereOr =[$map1,$map2,$map3,$map4,$map5,$map6];
 		}
 		$where[] = ['status', '>', 0];
 		$where[]=['delete_time','=',0];

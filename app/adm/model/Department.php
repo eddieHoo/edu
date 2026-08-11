@@ -23,7 +23,7 @@ class Department extends Model
     }
 	
 	public function update_auth_dids_son_dids(){
-		$admin = Db::name('Admin')->field('id,did,auth_did')->select()->toArray();
+		$admin = Db::name('Admin')->field('id,did')->select()->toArray();
 		foreach ($admin as $key => $val) {
 			$auth_dids = $this->get_auth_departments($val);
 			$son_dids = $this->get_son_departments($val);
@@ -40,116 +40,16 @@ class Department extends Model
 		$str='';
 		$uid = $admin['id'];
 		$did = $admin['did'];
-		$auth_did = $admin['auth_did'];
 		$dids = Db::name('Department')->where('status',1)->column('id');
 		$departments = Db::name('Department')->where('status',1)->select()->toArray();
 		//次要部门did
 		$secondary_dids = Db::name('DepartmentAdmin')->where('admin_id',$uid)->column('department_id');
 		//全部可见部门
 		$all_dids = array_merge($secondary_dids,[$did]);
-		
+		$str = implode(',',$all_dids);
 		//超级管理员||所有部门数据权限
-		if($uid==1 || $auth_did==10){
+		if($uid==1){
 			$str = implode(',',$dids);
-		}
-		//仅自己关联的数据
-		if($auth_did==0){
-			$str='';
-		}
-
-		//所属主部门的数据
-		if($auth_did==1){
-			$str=$did;
-		}
-		
-		//所属次部门的数据
-		if($auth_did==2){
-			$str = implode(',',$secondary_dids);
-		}
-		
-		//仅所属主次部门数据
-		if($auth_did==3){
-			$str = implode(',',$all_dids);
-		}
-		
-		//所属主部门及其子部门数据
-		if($auth_did==4){
-			//获取子部门
-			$department_list = get_data_node($departments, $did);
-			$department_array = array_column($department_list, 'id');
-			//包括自己部门在内
-			$department_array[] = $did;
-			$str = implode(',',$department_array);
-		}
-		
-		//所属次部门及其子部门数据
-		if($auth_did==5){
-			//获取子部门
-			$list_array = [];
-			foreach ($secondary_dids as $key => $value) {
-				$department_list = get_data_node($departments, $value);
-				$department_array = array_column($department_list, 'id');
-				//包括自己部门在内
-				$department_array[] = $value;
-				$list_array = array_merge($list_array,$department_array);
-			}
-			$new_array = array_unique($list_array);
-			$str = implode(',',$new_array);
-		}
-		
-		//所属主次部门及其子部门数据
-		if($auth_did==6){
-			//获取子部门
-			$list_array = [];
-			foreach ($all_dids as $key => $value) {
-				$department_list = get_data_node($departments, $value);
-				$department_array = array_column($department_list, 'id');
-				//包括自己部门在内
-				$department_array[] = $value;
-				$list_array = array_merge($list_array,$department_array);
-			}
-			$new_array = array_unique($list_array);
-			$str = implode(',',$new_array);
-		}
-		
-		//所属主部门所在顶级部门及其子部门数据
-		if($auth_did==7){
-			//获取顶级部门
-			$top_did = get_department_top($did);
-			$new_array = get_department_son($top_did,1);
-			$str = implode(',',$new_array);
-		}
-		
-		//所属次部门所在顶级部门及其子部门数据
-		if($auth_did==8){
-			//获取顶级部门
-			$top_dids =[];
-			foreach ($secondary_dids as $key => $value) {
-				array_push($top_dids, get_department_top($value));
-			}
-			
-			$list_array = [];
-			foreach ($top_dids as $key => $value) {
-				$list_array = array_merge($list_array,get_department_son($value,1));
-			}
-			$new_array = array_unique($list_array);
-			$str = implode(',',$new_array);
-		}
-		
-		//所属主次部门所在顶级部门及其子部门数据
-		if($auth_did==9){
-			//获取顶级部门
-			$top_dids =[];
-			foreach ($all_dids as $key => $value) {
-				array_push($top_dids, get_department_top($value));
-			}
-			
-			$list_array = [];
-			foreach ($top_dids as $key => $value) {
-				$list_array = array_merge($list_array,get_department_son($value,1));
-			}
-			$new_array = array_unique($list_array);
-			$str = implode(',',$new_array);
 		}
 		return $str;
 	}

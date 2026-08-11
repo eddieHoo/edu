@@ -131,28 +131,6 @@ function gouguInit() {
 				}
 			}
 		});
-	
-	
-		$('body').on('click','[name="lecturer"]',function(){
-			let that = $(this),ids = [],titles=[],map = {};
-			let callback = function(data){
-				for ( var i = 0; i <data.length; i++){
-					ids.push(data[i].id);
-					titles.push(data[i].name);
-				}
-				that.val(titles.join(','));
-				that.next().val(ids.join(','));
-			}
-			let opts={
-				"title":"选择讲师",
-				"url": "/course/api/get_lecturer",
-				"ids":"",
-				"titles":"",
-				"area": ['600px', '580px'],
-				"cols":[{field: 'id',width: 80,title:'序号',align:'center'},{ field: 'level_str', width: 100, title: '讲师等级', align: 'center' },{ field: 'education_str', width: 100, title: '学历', align: 'center' },{field:'name',title:'讲师'}]
-			}
-			oaPicker.picker(opts,1,callback,map);//单选
-		})
 
 		//监听提交
 		form.on('submit(webform)', function (data) {

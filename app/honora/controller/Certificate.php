@@ -40,7 +40,7 @@ class Certificate extends BaseController
     }	
 	
 	//证书列表
-    public function honorlist($param=[],$where=[],$whereOr=[])
+    public function honorlist()
     {
         if (request()->isAjax()) {
             $param = get_params();
@@ -57,7 +57,7 @@ class Certificate extends BaseController
     }
 	
 	//我的证书
-    public function mylist($param=[],$where=[],$whereOr=[])
+    public function mylist()
     {
         if (request()->isAjax()) {
             $param = get_params();
