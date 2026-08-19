@@ -95,22 +95,24 @@ class Statistics extends BaseController
 			['types','=',1],
 			['open_types','=',3],
 			['', 'exp', Db::raw("FIND_IN_SET('{$uid}',uids)")]
-		];			
+		];
+		$paper_whereOr =[$paper_map1,$paper_map2,$paper_map3,$paper_map4];
 		$course_ids = get_course($did,$pid,$uid);
 		$train_ids = get_train($did,$pid,$uid);				
 		if(!empty($course_ids)){
-			$paper_map5=[
+			 $paper_map5=[
 				['types','=',2],
 				['course_id','in',$course_ids]
 			];
+			$paper_whereOr[] = $paper_map5;
 		}			
 		if(!empty($train_ids)){
 			$paper_map6=[
 				['types','=',3],
 				['train_id','in',$train_ids]
 			];
+			$paper_whereOr[] = $paper_map6;
 		}
-		$paper_whereOr =[$paper_map1,$paper_map2,$paper_map3,$paper_map4,$paper_map5,$paper_map6];
 		
 		$paper_where[] = ['status', '>', 0];
 		$paper_where[]=['delete_time','=',0];
