@@ -14,12 +14,6 @@
 		<tr>
 			<td class="layui-td-gray">课程标题</td>
 			<td colspan="5">{$detail.title}</td>
-			<td class="layui-td-gray" rowspan="4">缩略图</td>
-			<td rowspan="4" style="width: 192px;padding:0 12px">
-				<div class="layui-upload-list" id="demo1" style="width: 200px; height:116px; overflow: hidden;">
-					<img src="{:get_file($detail.thumb)}" style="max-width: 100%; height:116px" onerror="javascript:this.src='/static/home/images/nonepic600x600.jpg';this.onerror=null;" />
-				</div>
-			</td>
 		</tr>
 		<tr>
 			<td class="layui-td-gray">课程分类</td>
@@ -46,12 +40,12 @@
 		</tr>
 		<tr>
 			<td class="layui-td-gray">简短介绍</td>
-			<td colspan="7"><pre style="font-family:inherit">{$detail.desc}</pre></td>
+			<td colspan="5"><pre style="font-family:inherit">{$detail.desc}</pre></td>
 		</tr>
 		{notempty name="$detail.courseware"}
 		<tr>
 			<td class="layui-td-gray">关联课件</td>
-			<td colspan="7" style="line-height:inherit">
+			<td colspan="5" style="line-height:inherit">
 				<div class="layui-row">
 					{volist name="$detail.file_array" id="vo"}
 						<div class="layui-col-md4" id="uploadFile{$vo.id}">{:file_card($vo,'view')}</div>
@@ -62,7 +56,7 @@
 		{/notempty}
 		<tr>
 			<td class="layui-td-gray">关联考试</td>
-			<td colspan="7">
+			<td colspan="5">
 				<table class="layui-table layui-table-min" style="margin:0">
 					<tr>
 						<th width="300">试卷名称</th>
