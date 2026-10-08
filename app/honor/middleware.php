@@ -4,6 +4,6 @@
 return [
     //开启session中间件
     //'think\middleware\SessionInit',
-    //验证勾股OA是否完成安装
+    //验证勾股EDU是否完成安装
     \app\home\middleware\Install::class,
 ];

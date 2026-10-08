@@ -16,19 +16,6 @@ layui.define(['tool'],function(exports){
 			this.splice(index, 1);
 		}
 	};	
-	//格式化文件大小
-	function renderSize(value){
-		if(null==value||value==''){
-			 return "0 Bytes";
-		}
-		var unitArr = new Array("Bytes","KB","MB","GB","TB","PB","EB","ZB","YB");
-		var index=0;
-		var srcsize = parseFloat(value);
-		index=Math.floor(Math.log(srcsize)/Math.log(1024));
-		var size =srcsize/Math.pow(1024,index);
-		size=size.toFixed(2);//保留的小数位数
-		return size+unitArr[index];
-	}	
 	//是否是对象
 	function isObject(obj) {
 		return Object.prototype.toString.call(obj) === '[object Object]';
@@ -44,6 +31,7 @@ layui.define(['tool'],function(exports){
 		"target":'uploadBtn',
 		"targetBox":'uploadBox',
 		"use":'attachment',//attachment(附件上传),shard(大文件分片上传),single(单图上传),multi(多图上传),import(excel导入上传)
+		"data":{},
 		"attachment":{
 			"type":0,//0ajax多文件模式，1ajax单文件单记录模式
 			"exts": 'png|jpg|gif|jpeg|doc|docx|ppt|pptx|xls|xlsx|pdf|zip|rar|7z|txt|wps|avi|wmv|mpg|mov|rm|flv|mp4|mp3|wav|wma|flac|midi|dwg|dxf|dwt|xmind', //只允许上传文件格式
@@ -53,13 +41,10 @@ layui.define(['tool'],function(exports){
 			"ajaxDelete":null
 		},
 		"shard":{
-			"exts": 'avi|wmv|flv|mp4|mp3|wav', //只允许上传文件格式
-			"exts_tips":'.mp4、.flv、.mp3、.wav',
-			"filepath":''
+			"exts": 'png|jpg|gif|jpeg|doc|docx|ppt|pptx|xls|xlsx|pdf|zip|rar|7z|txt|wps|avi|wmv|mpg|mov|rm|flv|mp4|mp3|wav|wma|flac|midi|dwg|dxf|dwt|xmind', //只允许上传文件格式
 		},
 		"single":{
 			"exts": 'png|jpg|gif|jpeg',
-			"filepath":''
 		},
 		"multi":{
 			"exts": 'png|jpg|gif|jpeg',
@@ -81,9 +66,7 @@ layui.define(['tool'],function(exports){
 		switch (me.settings.use) {
 			case "shard":
 				//分片上传
-				$('#'+me.settings.target).click(function(){
-					me.shardUpload();
-				});
+				me.shardUpload();
 				break;
 			case "single":
 				me.singleImage();
@@ -180,6 +163,7 @@ layui.define(['tool'],function(exports){
 			upload.render({
 				elem: '#'+me.settings.target,
 				url: me.settings.url,
+				data: me.settings.data,
 				accept: 'file',
 				exts: attachment.exts,
 				multiple: true,
@@ -196,7 +180,7 @@ layui.define(['tool'],function(exports){
 								idsArray = idsStr.split(",");
 							}
 							idsArray.push(res.data.id);
-							let filesize = renderSize(res.data.filesize),type=0,type_icon = 'icon-xiangmuguanli',ext = 'zip';
+							let filesize = tool.renderSize(res.data.filesize),type=0,type_icon = 'icon-xiangmuguanli',ext = 'zip';
 							if(res.data.fileext == 'pdf'){
 								type=1;
 								type_icon = 'icon-kejian';								
@@ -252,12 +236,11 @@ layui.define(['tool'],function(exports){
 			let single = upload.render({
 				elem: "#"+me.settings.target,
 				url: me.settings.url,
+				data: me.settings.data,
 				accept: 'images',
 				acceptMime:'image/*',
 				done: function (res) {
-					if (typeof (me.settings.callback) === "function") {
-						me.settings.callback(res);
-					}					
+					me.settings.callback(res);
 				}
 			});
 		},
@@ -280,142 +263,6 @@ layui.define(['tool'],function(exports){
 					}else{
 						me.uploadMore();	
 					}							
-				}
-			});
-		},
-		//分片上传
-		shardUpload: function (){
-			let me = this;
-			let template = '<div class="layui-form p-3">\
-						<div class="layui-form-item">\
-							<label class="layui-form-label">来源：</label>\
-							<div class="layui-input-block">\
-								<input type="radio" name="uploadtype" lay-filter="type" value="1" title="本地上传" checked>\
-								<input type="radio" name="uploadtype" lay-filter="type" value="2" title="网络文件">\
-							</div>\
-						</div>\
-						<div id="uploadType1">\
-							<div class="layui-form-item">\
-								<label class="layui-form-label">文件：</label>\
-								<div class="layui-input-block">\
-									<span class="gougu-upload-files">'+me.settings.shard.exts_tips+'</span><button type="button" class="layui-btn layui-btn-normal" id="gouguUploadBtn'+me.settings.index+'">选择文件</button>\
-								</div>\
-							</div>\
-							<div class="layui-form-item">\
-								<label class="layui-form-label"></label>\
-								<div class="layui-input-block">\
-									<span class="gougu-upload-tips">只能上传 '+me.settings.shard.exts_tips+' 文件</span>\
-								</div>\
-							</div>\
-							<div class="layui-form-item">\
-								<label class="layui-form-label"></label>\
-								<div class="layui-input-block" id="gouguUploadChoosed'+me.settings.index+'"></div>\
-							</div>\
-							<div class="layui-progress upload-progress" lay-showpercent="yes" lay-filter="upload-progress-'+me.settings.index+'" style="margin-bottom:12px; margin-left:100px; width:320px; display:none;">\
-							  <div class="layui-progress-bar layui-bg-blue" lay-percent=""><span class="layui-progress-text"></span></div>\
-							</div>\
-							<div class="layui-form-item layui-form-item-sm">\
-								<label class="layui-form-label"></label>\
-								<div class="layui-input-block">\
-									<button type="button" class="layui-btn" id="uploadNow'+me.settings.index+'">开始上传</button>\
-								</div>\
-							</div>\
-						</div>\
-						<div id="uploadType2" style="display:none; width:600px;">\
-							<div class="layui-form-item">\
-								<label class="layui-form-label">URL地址：</label>\
-								<div class="layui-input-block">\
-									<input type="text" name="img_url" value="'+me.settings.shard.filepath+'" placeholder="" autocomplete="off" class="layui-input">\
-								</div>\
-							</div>\
-							<div class="layui-form-item">\
-								<label class="layui-form-label">文件名称：</label>\
-								<div class="layui-input-block">\
-									<input type="text" name="img_name" placeholder="" autocomplete="off" class="layui-input">\
-								</div>\
-							</div>\
-							<div class="layui-form-item layui-form-item-sm">\
-								<label class="layui-form-label"></label>\
-								<div class="layui-input-block">\
-									<span class="layui-btn" id="uploadSave'+me.settings.index+'">确定保存</span>\
-								</div>\
-							</div>\
-						</div>\
-				</div>';
-			$(parent.$('.express-close')).addClass('parent-colse');
-			this.layerindex = layer.open({
-				'title':me.settings.title,
-				'area':['640px','360px'],
-				'content':template,
-				end: function(){
-					$(parent.$('.express-close')).removeClass('parent-colse');
-				},
-				'type':1,
-				'success':function(){
-					form.render();					
-					form.on('radio(type)', function(data){
-						if(data.value==1){
-							$('#uploadType1').show();
-							$('#uploadType2').hide();
-						}
-						else{
-							$('#uploadType1').hide();
-							$('#uploadType2').show();
-						}
-					}); 					
-					//选文件
-					let uploadOne = upload.render({
-						elem: '#gouguUploadBtn'+me.settings.index
-						,url: me.settings.url
-						,auto: false
-						,accept: 'file'
-						,exts: me.settings.shard.exts
-						,bindAction: '#uploadNow'+me.settings.index
-						,choose: function(obj){
-							obj.preview(function(index, file, result){
-								$('#gouguUploadChoosed'+me.settings.index).html('已选择：'+file.name);
-							});
-						}
-						,before: function(obj){
-							$('.upload-progress').show();
-							element.progress('upload-progress-'+me.settings.index, '0%');
-						}
-						,progress: function(n, elem, e){
-							console.log(n);
-							element.progress('upload-progress-'+me.settings.index, n + '%');
-						}
-						,done: function(res){
-							layer.msg(res.msg);
-							if(res.code==0){
-								if (typeof (me.settings.callback) === "function") {
-									me.settings.callback(res.data);
-								}
-								layer.close(me.layerindex);
-							}							
-						}
-					});
-							
-					$('#uploadSave'+me.settings.index).on('click',function(){
-						let url=$('[name="img_url"]').val();
-						let name=$('[name="img_name"]').val();
-						if(url == ''){
-							layer.msg('请输入文件URL地址');
-							return false;
-						}
-						if(name == ''){
-							layer.msg('请输入文件名称');
-							return false;
-						}
-						let res={
-							filepath:url,
-							name:name,
-							id:0
-						}
-						if (typeof (me.settings.callback) === "function") {
-							me.settings.callback(res);
-						}
-						layer.close(me.layerindex);
-					})						
 				}
 			});
 		},
@@ -456,11 +303,11 @@ layui.define(['tool'],function(exports){
 								</div>\
 							</div>\
 						</div>\
-						<div id="uploadType2" style="display:none; width:600px;">\
+						<div id="uploadType2" style="display:none; width:480px;">\
 							<div class="layui-form-item">\
 								<label class="layui-form-label">URL地址：</label>\
 								<div class="layui-input-block">\
-									<input type="text" name="img_url" value="'+me.settings.single.filepath+'" placeholder="" autocomplete="off" class="layui-input">\
+									<input type="text" name="img_url" placeholder="" autocomplete="off" class="layui-input">\
 								</div>\
 							</div>\
 							<div class="layui-form-item">\
@@ -510,6 +357,7 @@ layui.define(['tool'],function(exports){
 			let uploadOne = upload.render({
 				elem: '#gouguUploadBtn'+me.settings.index
 				,url: me.settings.url
+				,data: me.settings.data
 				,auto: false
 				,accept: 'images'
 				,acceptMime:'image/*'
@@ -530,9 +378,7 @@ layui.define(['tool'],function(exports){
 				,done: function(res){
 					layer.msg(res.msg);
 					if(res.code==0){
-						if (typeof (me.settings.callback) === "function") {
-							me.settings.callback(res.data);
-						}
+						me.settings.callback(res.data);
 						layer.close(me.layerindex);
 					}							
 				}
@@ -554,9 +400,7 @@ layui.define(['tool'],function(exports){
 					name:name,
 					id:0
 				}
-				if (typeof (me.settings.callback) === "function") {
-					me.settings.callback(res);
-				}
+				me.settings.callback(res);
 				layer.close(me.layerindex);
 			})
 		},
@@ -567,6 +411,7 @@ layui.define(['tool'],function(exports){
 				elem: '#gouguUploadBtn'+me.settings.index
 				,elemList: $('#gouguUploadBox'+me.settings.index) //列表元素对象
 				,url: me.settings.url
+				,data: me.settings.data
 				,accept: 'images'
 				,acceptMime:'image/*'
 				,multiple: true
@@ -619,9 +464,7 @@ layui.define(['tool'],function(exports){
 				,allDone: function(obj){ //多文件上传完毕后的状态回调
 					//console.log(obj);
 					layer.msg('上传成功');
-					if (typeof (me.settings.callback) === "function") {
-						me.settings.callback(file_lists,obj);
-					}
+					me.settings.callback(file_lists,obj);
 					layer.close(me.layerindex);
 				}
 				,error: function(index, upload){ //错误回调
@@ -638,9 +481,7 @@ layui.define(['tool'],function(exports){
 			})
 			$('#uploadOk'+me.settings.index).click(function(){
 				if(me.settings.files.length>0){
-					if (typeof (me.settings.callback) === "function") {
-						me.settings.callback(me.settings.files);
-					}
+					me.settings.callback(me.settings.files);
 					layer.close(me.layerindex);
 				}
 				else{
@@ -652,6 +493,10 @@ layui.define(['tool'],function(exports){
 		excelImport:function(){
 			let me = this;
 			$(parent.$('.express-close')).addClass('parent-colse');
+			let excelBtn = '<span class="layui-btn excel-btn ml-2">Excel模板下载</span>';
+			if(me.settings.import.template!=''){
+				excelBtn = '<a href="'+me.settings.import.template+'" target="_blank" class="layui-btn ml-2">Excel模板下载</a>';
+			}
 			layer.open({
 				'title':me.settings.title,
 				'type':1,
@@ -661,7 +506,7 @@ layui.define(['tool'],function(exports){
 									<div class="layui-form-item">\
 										<label class="layui-form-label">选择文件：</label>\
 										<div class="layui-input-block">\
-											<div class="layui-input-inline" style="width:286px;"><input type="text" id="inputImport'+me.settings.index+'" placeholder=".xls,.xlsx" class="layui-input" readonly></div><button type="button" class="layui-btn layui-btn-normal" id="importSelect'+me.settings.index+'">选择文件</button><a href="'+me.settings.import.template+'" target="_blank" class="layui-btn ml-2">Excel模板下载</a>\
+											<div class="layui-input-inline" style="width:286px;"><input type="text" id="inputImport'+me.settings.index+'" placeholder=".xls,.xlsx" class="layui-input" readonly></div><button type="button" class="layui-btn layui-btn-normal" id="importSelect'+me.settings.index+'">选择文件</button>'+excelBtn+'\
 										</div>\
 									</div>\
 								</div>\
@@ -689,6 +534,7 @@ layui.define(['tool'],function(exports){
 					let uploadImport = upload.render({
 						elem: '#importSelect'+me.settings.index
 						,url: me.settings.url
+						,data: me.settings.data
 						,auto: false
 						,accept: 'file' //普通文件
 						,acceptMime: 'application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' // 此处设置上传的文件格式
@@ -724,9 +570,7 @@ layui.define(['tool'],function(exports){
 							layer.msg(res.msg);
 							if(res.code==0){
 								layer.close(idx);
-								if (typeof (me.settings.callback) === "function") {
-									me.settings.callback(res);
-								}		
+								me.settings.callback(res);			
 							}
 							else{
 								$('#importSelect'+me.settings.index).html('选择文件');

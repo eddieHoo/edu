@@ -3,9 +3,9 @@
 +-----------------------------------------------------------------------------------------------
 * GouGuOPEN [ 左手研发，右手开源，未来可期！]
 +-----------------------------------------------------------------------------------------------
-* @Copyright (c) 2021~2024 http://www.gouguoa.com All rights reserved.
+* @Copyright (c)  http://www.gougucms.com All rights reserved.
 +-----------------------------------------------------------------------------------------------
-* @Licensed 勾股OA，开源且可免费使用，但并不是自由软件，未经授权许可不能去除勾股OA的相关版权信息
+* @Licensed 勾股EDU，开源且可免费使用，但并不是自由软件，未经授权许可不能去除勾股EDU的相关版权信息
 +-----------------------------------------------------------------------------------------------
 * @Author 勾股工作室 <hdm58@qq.com>
 +-----------------------------------------------------------------------------------------------
@@ -16,6 +16,7 @@ namespace app\api\controller;
 
 use app\api\BaseController;
 use app\api\model\EditLog;
+use think\Image; // 引入Image类
 use think\facade\Db;
 
 class Index extends BaseController
@@ -82,9 +83,18 @@ class Index extends BaseController
 			});
 			if ($filename) {
 				//写入到附件表
+				$imagePath = get_config('filesystem.disks.public.url'). '/' . $filename;
+				$thumbPath = '';
+				if(in_array($file->extension(),['jpg','png','jpeg','gif'])){
+					// 生成等比缩略图
+					$image = Image::open(request()->file('file'));
+					$thumbPath = dirname($imagePath) . '/thumb_' . basename($imagePath);
+					// 生成等比缩略图保存到指定位置，这里设置最大宽度为256px, 高度自适应
+					$image->thumb(256,256)->save('./'.$thumbPath);
+				}
 				$data = [];
-				$path = get_config('filesystem.disks.public.url');
-				$data['filepath'] = $path . '/' . $filename;
+				$data['filepath'] = $imagePath;
+				$data['thumbpath'] = $thumbPath;
 				$data['name'] = $file->getOriginalName();
 				$data['mimetype'] = $file->getOriginalMime();
 				$data['fileext'] = $file->extension();

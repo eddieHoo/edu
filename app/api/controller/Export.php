@@ -5,7 +5,7 @@
 +-----------------------------------------------------------------------------------------------
 * @Copyright (c) http://www.gouguoa.com All rights reserved.
 +-----------------------------------------------------------------------------------------------
-* @Licensed 勾股OA，开源且可免费使用，但并不是自由软件，未经授权许可不能去除勾股OA的相关版权信息
+* @Licensed 勾股EDU，开源且可免费使用，但并不是自由软件，未经授权许可不能去除勾股EDU的相关版权信息
 +-----------------------------------------------------------------------------------------------
 * @Author 勾股工作室 <hdm58@qq.com>
 +-----------------------------------------------------------------------------------------------
@@ -106,7 +106,7 @@ class Export extends BaseController
 		$pageNumber = count($mpdf->pages);
 		$header= '<table width="100%" style="margin:0;padding:0"><tr> 
 <td width="50%" style="text-align:left;font-size:12px; color:#999999;margin:0;padding:0"><img src="'.$logo.'" height="36" /></td> 
-<td width="50%" style="text-align:right;font-size:12px; color:#999999;margin:0;padding:0">勾股OA办公系统</td> 
+<td width="50%" style="text-align:right;font-size:12px; color:#999999;margin:0;padding:0">勾股EDU办公系统</td> 
 </tr></table><hr style="border-color:#f1f1f1;margin:0">';
 		$page= '<p style="text-align:center;font-size:12px; color:#999999">第 {PAGENO}/{nbpg} 页</p>';
 		if($is_header){

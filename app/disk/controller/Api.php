@@ -5,7 +5,7 @@
 +-----------------------------------------------------------------------------------------------
 * @Copyright (c) http://www.gouguoa.com All rights reserved.
 +-----------------------------------------------------------------------------------------------
-* @Licensed 勾股OA，开源且可免费使用，但并不是自由软件，未经授权许可不能去除勾股OA的相关版权信息
+* @Licensed 勾股EDU，开源且可免费使用，但并不是自由软件，未经授权许可不能去除勾股EDU的相关版权信息
 +-----------------------------------------------------------------------------------------------
 * @Author 勾股工作室 <hdm58@qq.com>
 +-----------------------------------------------------------------------------------------------
@@ -102,8 +102,8 @@ class Api extends BaseController
 				$fileSize = $param['size'];
 			}
 			$validate = \think\facade\Validate::rule([
-				//'image' => 'require|fileSize:' . $fileSize . '|fileExt:' . $fileExt,
-				'image' => 'require|fileSize:' . $fileSize,
+				'image' => 'require|fileSize:' . $fileSize . '|fileExt:' . $fileExt,
+				//'image' => 'require|fileSize:' . $fileSize,
 			]);
 			$file_check['image'] = $file;
 			if (!$validate->check($file_check)) {
