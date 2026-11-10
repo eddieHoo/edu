@@ -154,7 +154,7 @@ class Index extends BaseController
 		if (request()->isAjax()) {
             $param = get_params();
             $uid = $this->uid;
-            Db::name('Admin')->where(['id' => $uid])->strict(false)->field(true)->update($param);
+            Db::name('Admin')->where(['id' => $uid])->strict(false)->field('sex,desc,thumb')->update($param);
             return to_assign();
         }
 		else{

@@ -41,12 +41,35 @@ class Note extends BaseController
     {
 		$param = get_params();
         if (request()->isAjax()) {
+			$uid = $this->uid;
+			$did = $this->did;
+			$pid = $this->poid;
 			$where=[];
 			$where[]=['a.delete_time','=',0];
             if (!empty($param['keywords'])) {
                 $where[] = ['a.id|a.title', 'like', '%' . $param['keywords'] . '%'];
             }
-            $list = $this->model->datalist($where, $param);
+			$whereOr=[];
+			$map0=[
+				['admin_id','=',$uid]
+			];
+			$map1=[
+				['role_type','=',0]
+			];
+			$map2=[
+				['role_type','=',1],
+				['', 'exp', Db::raw("FIND_IN_SET('{$did}',role_dids)")]
+			];
+			$map3=[
+				['role_type','=',2],
+				['', 'exp', Db::raw("FIND_IN_SET('{$pid}',role_pids)")]
+			];
+			$map4=[
+				['role_type','=',3],
+				['', 'exp', Db::raw("FIND_IN_SET('{$uid}',role_uids)")]
+			];
+			$whereOr =[$map0,$map1,$map2,$map3,$map4];
+            $list = $this->model->datalist($param,$where,$whereOr);
             return table_assign(0, '', $list);
         }
         else{
