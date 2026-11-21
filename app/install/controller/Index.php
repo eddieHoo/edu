@@ -137,9 +137,11 @@ class Index
             if (!empty($v)) {				
 				try {
 					//var_dump($v);
-					$link->query($v);
+					if (false === $link->query($v)) {
+						return to_assign(1, '数据写入失败：' . $link->error);
+					}
 				} catch (\Exception $e) {
-					return to_assign(1, '数据写入失败，请联系官方！'.$v);
+					return to_assign(1, '数据写入失败：' . $e->getMessage());
 					break;
 				}
             }
